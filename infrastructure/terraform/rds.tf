@@ -10,21 +10,21 @@ resource "aws_db_subnet_group" "hr_db" {
 
 resource "aws_security_group" "rds_sg" {
   name        = "hr-rds-sg"
-  description = "Security group for HRMS PostgreSQL database"
+  description = "Security group for HRMS MySQL database"
   vpc_id      = module.vpc.vpc_id
 
   ingress {
-    description     = "PostgreSQL from Jenkins CI server"
-    from_port       = 5432
-    to_port         = 5432
+    description     = "MySQL from Jenkins CI server"
+    from_port       = 3306
+    to_port         = 3306
     protocol        = "tcp"
     security_groups = [aws_security_group.jenkins_sg.id]
   }
 
   ingress {
-    description = "PostgreSQL from internal VPC subnet (EKS workers later)"
-    from_port   = 5432
-    to_port     = 5432
+    description = "MySQL from internal VPC subnet (EKS workers later)"
+    from_port   = 3306
+    to_port     = 3306
     protocol    = "tcp"
     cidr_blocks = [var.vpc_cidr]
   }
@@ -42,14 +42,14 @@ resource "aws_security_group" "rds_sg" {
   }
 }
 
-resource "aws_db_instance" "hr_postgres" {
+resource "aws_db_instance" "hr_db" {
   identifier             = "hr-db-server"
-  engine                 = "postgres"
-  engine_version         = "15.7"        # Using stable Postgres 15 series
+  engine                 = "mysql"
+  engine_version         = "8.0"         # Using stable MySQL 8.0 (matches docker-compose.yml & application.properties)
   instance_class         = "db.t3.micro" # Free-tier / low-cost eligible
   allocated_storage      = 20
-  db_name                = "hrdb"
-  username               = "hradmin"
+  db_name                = "hrms_db" # Matches MYSQL_DATABASE / application.properties
+  username               = "admin"   # MySQL master username
   password               = var.db_password
   db_subnet_group_name   = aws_db_subnet_group.hr_db.name
   vpc_security_group_ids = [aws_security_group.rds_sg.id]

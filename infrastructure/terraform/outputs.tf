@@ -29,8 +29,8 @@ output "jenkins_public_ip" {
 }
 
 output "rds_endpoint" {
-  value       = aws_db_instance.hr_postgres.endpoint
-  description = "Connection endpoint for HRMS PostgreSQL RDS instance"
+  value       = aws_db_instance.hr_db.endpoint
+  description = "Connection endpoint for HRMS MySQL RDS instance"
 }
 
 output "backend_ecr_repository_url" {

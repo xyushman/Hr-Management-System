@@ -54,7 +54,7 @@ resource "aws_instance" "jenkins" {
   vpc_security_group_ids = [aws_security_group.jenkins_sg.id]
   key_name               = var.key_pair_name
 
-  user_data = file("${path.module}/jenkins-install.sh")
+  user_data = file("${path.module}/Scripts/jenkins-install.sh")
 
   root_block_device {
     volume_size = 25 # 25 GB GP3 for Jenkins + Docker images cache
