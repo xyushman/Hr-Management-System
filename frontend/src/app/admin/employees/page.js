@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   getAllEmployees,
   searchEmployees,
@@ -17,15 +17,35 @@ function Badge({ status }) {
     HR:        { bg: '#fdf4ff', color: '#9333ea' },
     EMPLOYEE:  { bg: '#f1f5f9', color: '#374151' },
   };
-  const s = map[status] || { bg: '#f1f5f9', color: '#64748b' };
+  const style = map[status] || { bg: '#f1f5f9', color: '#64748b' };
   return (
-    <span style={{
-      background: s.bg, color: s.color,
-      padding: '3px 10px', borderRadius: '20px',
-      fontSize: '11px', fontWeight: '700',
-    }}>
+    <span style={{ padding: '3px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: '700', background: style.bg, color: style.color }}>
       {status}
     </span>
+  );
+}
+
+function InputField({ label, name, type = 'text', required, placeholder, value, onChange }) {
+  return (
+    <div>
+      <label style={{ fontSize: '12px', fontWeight: '600', color: '#374151', display: 'block', marginBottom: '5px' }}>
+        {label} {required && <span style={{ color: '#ef4444' }}>*</span>}
+      </label>
+      <input
+        type={type}
+        value={value || ''}
+        onChange={e => onChange(name, e.target.value)}
+        placeholder={placeholder}
+        required={required}
+        style={{
+          width: '100%', padding: '9px 12px',
+          border: '1.5px solid #e2e8f0', borderRadius: '8px',
+          fontSize: '13px', outline: 'none', boxSizing: 'border-box',
+        }}
+        onFocus={e => e.target.style.borderColor = '#3b82f6'}
+        onBlur={e => e.target.style.borderColor = '#e2e8f0'}
+      />
+    </div>
   );
 }
 
@@ -53,28 +73,7 @@ export default function EmployeeManagementPage() {
   const [totalElements, setTotalElements] = useState(0);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(null);
 
-  useEffect(() => {
-    if (search.trim()) {
-      handleSearch();
-    } else {
-      fetchEmployees();
-    }
-  }, [page]);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (search.trim()) {
-        setPage(0);
-        handleSearch();
-      } else {
-        setPage(0);
-        fetchEmployees();
-      }
-    }, 400);
-    return () => clearTimeout(timer);
-  }, [search]);
-
-  const fetchEmployees = async () => {
+  const fetchEmployees = useCallback(async () => {
     setLoading(true);
     try {
       const res = await getAllEmployees(page, 10);
@@ -87,9 +86,9 @@ export default function EmployeeManagementPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [page]);
 
-  const handleSearch = async () => {
+  const handleSearch = useCallback(async () => {
     if (!search.trim()) return;
     setSearching(true);
     try {
@@ -103,7 +102,18 @@ export default function EmployeeManagementPage() {
     } finally {
       setSearching(false);
     }
-  };
+  }, [search, page]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (search.trim()) {
+        handleSearch();
+      } else {
+        fetchEmployees();
+      }
+    }, search.trim() ? 400 : 0);
+    return () => clearTimeout(timer);
+  }, [search, page, handleSearch, fetchEmployees]);
 
   const openAddForm = () => {
     setEditMode(false);
@@ -171,27 +181,7 @@ export default function EmployeeManagementPage() {
     }
   };
 
-  const InputField = ({ label, name, type = 'text', required, placeholder }) => (
-    <div>
-      <label style={{ fontSize: '12px', fontWeight: '600', color: '#374151', display: 'block', marginBottom: '5px' }}>
-        {label} {required && <span style={{ color: '#ef4444' }}>*</span>}
-      </label>
-      <input
-        type={type}
-        value={form[name]}
-        onChange={e => setForm({ ...form, [name]: e.target.value })}
-        placeholder={placeholder}
-        required={required}
-        style={{
-          width: '100%', padding: '9px 12px',
-          border: '1.5px solid #e2e8f0', borderRadius: '8px',
-          fontSize: '13px', outline: 'none', boxSizing: 'border-box',
-        }}
-        onFocus={e => e.target.style.borderColor = '#3b82f6'}
-        onBlur={e => e.target.style.borderColor = '#e2e8f0'}
-      />
-    </div>
-  );
+  const handleFieldChange = (name, val) => setForm(prev => ({ ...prev, [name]: val }));
 
   return (
     <div>
@@ -386,16 +376,16 @@ export default function EmployeeManagementPage() {
 
             <form onSubmit={handleSubmit}>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '14px' }}>
-                <InputField label="First Name" name="firstName" required placeholder="John"/>
-                <InputField label="Last Name" name="lastName" required placeholder="Doe"/>
-                <InputField label="Email" name="email" type="email" required placeholder="john@hrms.com"/>
-                <InputField label={editMode ? "Password (leave blank to keep)" : "Password"} name="password" type="password" required={!editMode} placeholder="Min 8 characters"/>
-                <InputField label="Phone" name="phone" placeholder="9876543210"/>
-                <InputField label="Department" name="department" placeholder="Engineering"/>
-                <InputField label="Designation" name="designation" placeholder="Software Engineer"/>
-                <InputField label="Basic Salary" name="basicSalary" type="number" placeholder="50000"/>
-                <InputField label="Date of Joining" name="dateOfJoining" type="date"/>
-                <InputField label="Date of Birth" name="dateOfBirth" type="date"/>
+                <InputField label="First Name" name="firstName" required placeholder="John" value={form.firstName} onChange={handleFieldChange}/>
+                <InputField label="Last Name" name="lastName" required placeholder="Doe" value={form.lastName} onChange={handleFieldChange}/>
+                <InputField label="Email" name="email" type="email" required placeholder="john@hrms.com" value={form.email} onChange={handleFieldChange}/>
+                <InputField label={editMode ? "Password (leave blank to keep)" : "Password"} name="password" type="password" required={!editMode} placeholder="Min 8 characters" value={form.password} onChange={handleFieldChange}/>
+                <InputField label="Phone" name="phone" placeholder="9876543210" value={form.phone} onChange={handleFieldChange}/>
+                <InputField label="Department" name="department" placeholder="Engineering" value={form.department} onChange={handleFieldChange}/>
+                <InputField label="Designation" name="designation" placeholder="Software Engineer" value={form.designation} onChange={handleFieldChange}/>
+                <InputField label="Basic Salary" name="basicSalary" type="number" placeholder="50000" value={form.basicSalary} onChange={handleFieldChange}/>
+                <InputField label="Date of Joining" name="dateOfJoining" type="date" value={form.dateOfJoining} onChange={handleFieldChange}/>
+                <InputField label="Date of Birth" name="dateOfBirth" type="date" value={form.dateOfBirth} onChange={handleFieldChange}/>
               </div>
 
               {/* Role */}

@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import api from '@/lib/axios';
 import toast from 'react-hot-toast';
 
@@ -60,16 +60,19 @@ export default function RecruitmentPage() {
   const [interviewNotes, setInterviewNotes] = useState('');
   const [rejectionReason, setRejectionReason] = useState('');
 
-  useEffect(() => { fetchJobs(); }, []);
-
-  const fetchJobs = async () => {
+  const fetchJobs = useCallback(async () => {
     setLoading(true);
     try {
       const res = await api.get('/api/recruitment/jobs/all');
       setJobs(res.data?.data?.content || res.data?.data || []);
     } catch { toast.error('Failed to load jobs'); }
     finally { setLoading(false); }
-  };
+  }, []);
+
+  useEffect(() => {
+    const timer = setTimeout(() => { fetchJobs(); }, 0);
+    return () => clearTimeout(timer);
+  }, [fetchJobs]);
 
   const fetchApplications = async (jobId) => {
     setLoadingApps(true);

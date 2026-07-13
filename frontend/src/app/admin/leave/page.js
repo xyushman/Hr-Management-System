@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   getPendingLeaves,
   getPendingCancellations,
@@ -42,11 +42,7 @@ export default function AdminLeavePage() {
   const [page, setPage]                 = useState(0);
   const [totalPages, setTotalPages]     = useState(0);
 
-useEffect(() => {
-  fetchData();
-}, [page, tab]);
-
-const fetchData = async () => {
+const fetchData = useCallback(async () => {
   setLoading(true);
   try {
     // Fetch all pending leaves in one call
@@ -58,39 +54,46 @@ const fetchData = async () => {
     console.log('All leaves:', all.map(l => ({
       id: l.id,
       name: l.employeeName,
-      status: l.status,
-      stage: l.approvalStage
+      stage: l.approvalStage || l.status,
+      leaveType: l.leaveType
     })));
 
-    // Split by approval stage
-    const mp = all.filter(l =>
-      l.approvalStage === 'MANAGER_PENDING' ||
-      l.status === 'PENDING'
-    );
-    const hp = all.filter(l =>
-      l.approvalStage === 'HR_PENDING' ||
-      l.status === 'HR_PENDING'
-    );
-
-    setManagerPending(mp);
-    setHrPending(hp);
-
-// Cancellations
-const cancelRes = await api.get(
-  '/api/leaves/pending-cancellations?page=0&size=100'
-);
-console.log('Cancel data:', cancelRes.data?.data?.content);
-setCancellations(
-  cancelRes.data?.data?.content || []
-);
-
+    // Filter by tab on client side
+    if (tab === 'MANAGER_PENDING') {
+      const filtered = all.filter(l =>
+        (l.approvalStage || l.status) === 'MANAGER_PENDING' ||
+        (l.approvalStage || l.status) === 'PENDING'
+      );
+      setManagerPending(filtered);
+    } else if (tab === 'HR_PENDING') {
+      const filtered = all.filter(l =>
+        (l.approvalStage || l.status) === 'HR_PENDING'
+      );
+      setHrPending(filtered);
+    } else if (tab === 'CANCEL_PENDING') {
+      try {
+        const cancelRes = await getPendingCancellations(page, 10);
+        setCancellations(cancelRes.data?.data?.content || []);
+      } catch (e) {
+        setCancellations([]);
+      }
+    } else {
+      // Handle cases
+    }
   } catch (err) {
     toast.error('Failed to load leaves');
     console.error(err);
   } finally {
     setLoading(false);
   }
-};
+}, [tab, page]);
+
+useEffect(() => {
+  const timer = setTimeout(() => {
+    fetchData();
+  }, 0);
+  return () => clearTimeout(timer);
+}, [fetchData]);
 
   // Manager approves → goes to HR_PENDING
   const handleManagerAction = async (id, action) => {
@@ -297,7 +300,7 @@ setCancellations(
                       {l.employeeName}
                     </div>
                     <div style={{ fontSize: '11px', color: '#94a3b8', fontStyle: 'italic' }}>
-                      "{l.reason?.substring(0, 25)}{l.reason?.length > 25 ? '...' : ''}"
+                      &quot;{l.reason?.substring(0, 25)}{l.reason?.length > 25 ? '...' : ''}&quot;
                     </div>
                   </div>
                 </div>

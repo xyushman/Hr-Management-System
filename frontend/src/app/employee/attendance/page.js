@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { getMyAttendance, checkIn, checkOut } from '@/lib/employeeApi';
 import toast from 'react-hot-toast';
 
@@ -33,11 +33,7 @@ export default function AttendancePage() {
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
 
-  useEffect(() => {
-    fetchAttendance();
-  }, [page]);
-
-  const fetchAttendance = async () => {
+  const fetchAttendance = useCallback(async () => {
     setLoading(true);
     try {
       const res = await getMyAttendance(page, 10);
@@ -53,7 +49,12 @@ export default function AttendancePage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [page]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => { fetchAttendance(); }, 0);
+    return () => clearTimeout(timer);
+  }, [fetchAttendance]);
 
   const handleCheckIn = async () => {
     setCheckingIn(true);

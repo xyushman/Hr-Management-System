@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { getMyLeaves, getLeaveBalance } from '@/lib/employeeApi';
 import api from '@/lib/axios';
 import toast from 'react-hot-toast';
@@ -47,12 +47,7 @@ export default function LeavePage() {
     managerId:  '',
   });
 
-  useEffect(() => {
-    fetchAll();
-    fetchManagers();
-  }, [page]);
-
-  const fetchAll = async () => {
+  const fetchAll = useCallback(async () => {
     setLoading(true);
     try {
       const [leaveRes, balRes] = await Promise.allSettled([
@@ -72,38 +67,45 @@ export default function LeavePage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [page]);
 
-const fetchManagers = async () => {
-  try {
-    const res = await api.get('/api/employees/managers');
-    console.log('Full response:', res);
-    console.log('Response data:', res.data);
-    console.log('Response data.data:', res.data?.data);
+  const fetchManagers = useCallback(async () => {
+    try {
+      const res = await api.get('/api/employees/managers');
+      console.log('Full response:', res);
+      console.log('Response data:', res.data);
+      console.log('Response data.data:', res.data?.data);
 
-    // Try all possible response structures
-    const all =
-      res.data?.data?.content ||   // paginated
-      res.data?.data ||            // list directly
-      res.data?.content ||         // another format
-      res.data ||                  // raw data
-      [];
+      const all =
+        res.data?.data?.content ||   // paginated
+        res.data?.data ||            // list directly
+        res.data?.content ||         // another format
+        res.data ||                  // raw data
+        [];
 
-    console.log('Managers list:', all);
-    console.log('Managers count:', all.length);
+      console.log('Managers list:', all);
+      console.log('Managers count:', all.length);
 
-    if (Array.isArray(all) && all.length > 0) {
-      setManagers(all);
-      setForm(prev => ({ ...prev, managerId: all[0].id }));
-    } else {
-      console.warn('No managers found in response');
+      if (Array.isArray(all) && all.length > 0) {
+        setManagers(all);
+        setForm(prev => ({ ...prev, managerId: all[0].id }));
+      } else {
+        console.warn('No managers found in response');
+      }
+    } catch (err) {
+      console.error('fetchManagers status:', err.response?.status);
+      console.error('fetchManagers data:', err.response?.data);
+      console.error('fetchManagers message:', err.message);
     }
-  } catch (err) {
-    console.error('fetchManagers status:', err.response?.status);
-    console.error('fetchManagers data:', err.response?.data);
-    console.error('fetchManagers message:', err.message);
-  }
-};
+  }, []);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      fetchAll();
+      fetchManagers();
+    }, 0);
+    return () => clearTimeout(timer);
+  }, [fetchAll, fetchManagers]);
 
   const handleApply = async (e) => {
     e.preventDefault();

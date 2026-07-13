@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { getAllEmployees } from '@/lib/adminApi';
 import api from '@/lib/axios';
 import toast from 'react-hot-toast';
@@ -44,9 +44,7 @@ export default function OnboardingPage() {
   const [remarks, setRemarks]           = useState('');
   const [tab, setTab]                   = useState('ALL');
 
-  useEffect(() => { fetchAll(); }, []);
-
-  const fetchAll = async () => {
+  const fetchAll = useCallback(async () => {
     setLoading(true);
     try {
       const [onbRes, empRes] = await Promise.allSettled([
@@ -61,7 +59,12 @@ export default function OnboardingPage() {
       }
     } catch { toast.error('Failed to load data'); }
     finally { setLoading(false); }
-  };
+  }, []);
+
+  useEffect(() => {
+    const timer = setTimeout(() => { fetchAll(); }, 0);
+    return () => clearTimeout(timer);
+  }, [fetchAll]);
 
   const handleSelect = (onb) => {
     setSelected(onb);

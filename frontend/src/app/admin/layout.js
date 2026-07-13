@@ -15,7 +15,7 @@ export default function AdminLayout({ children }) {
     } else if (user?.role === 'EMPLOYEE') {
       router.push('/employee/dashboard');
     }
-  }, [isAuthenticated, user]);
+  }, [isAuthenticated, user, router]);
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: '#f8fafc' }}>

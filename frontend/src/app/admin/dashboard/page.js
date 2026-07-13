@@ -65,10 +65,6 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [actioning, setActioning] = useState(null);
 
-  useEffect(() => {
-    fetchAll();
-  }, []);
-
   const fetchAll = async () => {
     setLoading(true);
     const today = new Date().toISOString().split('T')[0];
@@ -83,11 +79,10 @@ export default function AdminDashboard() {
       if (empRes.status === 'fulfilled') {
         setEmployees(empRes.value.data?.data?.content || []);
       }
-     if (leaveRes.status === 'fulfilled') {
-  const allLeaves = leaveRes.value.data?.data?.content || [];
-  // Show ALL pending leaves regardless of stage
-  setPendingLeaves(allLeaves);
-}
+      if (leaveRes.status === 'fulfilled') {
+        const allLeaves = leaveRes.value.data?.data?.content || [];
+        setPendingLeaves(allLeaves);
+      }
       if (attRes.status === 'fulfilled') {
         setTodayAttendance(attRes.value.data?.data?.content || []);
       }
@@ -100,6 +95,35 @@ export default function AdminDashboard() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    let active = true;
+    const loadInitial = async () => {
+      const today = new Date().toISOString().split('T')[0];
+      try {
+        const [empRes, leaveRes, attRes, unreadRes] = await Promise.allSettled([
+          getAllEmployees(0, 100),
+          getPendingLeaves(0, 5),
+          getAttendanceByDate(today),
+          getUnreadCount(),
+        ]);
+        if (active) {
+          if (empRes.status === 'fulfilled') setEmployees(empRes.value.data?.data?.content || []);
+          if (leaveRes.status === 'fulfilled') setPendingLeaves(leaveRes.value.data?.data?.content || []);
+          if (attRes.status === 'fulfilled') setTodayAttendance(attRes.value.data?.data?.content || []);
+          if (unreadRes.status === 'fulfilled') setUnreadCount(unreadRes.value.data?.data || 0);
+          setLoading(false);
+        }
+      } catch (err) {
+        if (active) {
+          toast.error('Failed to load dashboard');
+          setLoading(false);
+        }
+      }
+    };
+    loadInitial();
+    return () => { active = false; };
+  }, []);
 
 const handleLeaveAction = async (id, action) => {
   setActioning(id + action);
@@ -158,7 +182,7 @@ const handleLeaveAction = async (id, action) => {
           Dashboard
         </h1>
         <p style={{ fontSize: '13px', color: '#94a3b8' }}>
-          Welcome back, {user?.name}! Here's your system overview.
+          Welcome back, {user?.name}! Here&apos;s your system overview.
         </p>
       </div>
 
@@ -229,7 +253,7 @@ const handleLeaveAction = async (id, action) => {
                       <Badge status={l.status}/>
                     </div>
                     <div style={{ fontSize: '12px', color: '#64748b', marginBottom: '10px', fontStyle: 'italic' }}>
-                      "{l.reason}"
+                      &quot;{l.reason}&quot;
                     </div>
                     <div style={{ display: 'flex', gap: '8px' }}>
                      <button
@@ -270,7 +294,7 @@ const handleLeaveAction = async (id, action) => {
             <div style={{ background: 'white', borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 1px 4px rgba(0,0,0,0.04)', overflow: 'hidden' }}>
               <div style={{ padding: '16px 20px', borderBottom: '1px solid #e2e8f0' }}>
                 <h3 style={{ fontSize: '15px', fontWeight: '700', color: '#1e293b' }}>
-                  📅 Today's Attendance
+                  📅 Today&apos;s Attendance
                 </h3>
                 <p style={{ fontSize: '12px', color: '#94a3b8', marginTop: '2px' }}>
                   {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}

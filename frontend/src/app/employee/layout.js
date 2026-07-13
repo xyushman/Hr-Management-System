@@ -11,7 +11,7 @@ export default function EmployeeLayout({ children }) {
 
   useEffect(() => {
     if (!isAuthenticated) router.push('/');
-  }, [isAuthenticated]);
+  }, [isAuthenticated, router]);
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: '#f8fafc' }}>

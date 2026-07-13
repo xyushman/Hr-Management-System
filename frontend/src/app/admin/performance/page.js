@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { getAllEmployees } from '@/lib/adminApi';
 import api from '@/lib/axios';
 import toast from 'react-hot-toast';
@@ -53,11 +53,7 @@ export default function PerformancePage() {
   const [submitting, setSubmitting] = useState(false);
   const [selected, setSelected]   = useState(null);
 
-  useEffect(() => {
-    fetchAll();
-  }, []);
-
-  const fetchAll = async () => {
+  const fetchAll = useCallback(async () => {
     setLoading(true);
     try {
       const [revRes, empRes] = await Promise.allSettled([
@@ -75,7 +71,12 @@ export default function PerformancePage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    const timer = setTimeout(() => { fetchAll(); }, 0);
+    return () => clearTimeout(timer);
+  }, [fetchAll]);
 
   const handleCreate = async (e) => {
     e.preventDefault();
@@ -101,21 +102,7 @@ export default function PerformancePage() {
     }
   };
 
-  const RatingInput = ({ label, name }) => (
-    <div>
-      <label style={{ fontSize: '12px', fontWeight: '600', color: '#374151', display: 'block', marginBottom: '5px' }}>
-        {label} ({form[name]}/5)
-      </label>
-      <input
-        type="range" min="1" max="5" value={form[name]}
-        onChange={e => setForm({ ...form, [name]: e.target.value })}
-        style={{ width: '100%' }}
-      />
-      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '10px', color: '#94a3b8' }}>
-        <span>Poor</span><span>Average</span><span>Excellent</span>
-      </div>
-    </div>
-  );
+  const handleRatingChange = (name, val) => setForm(prev => ({ ...prev, [name]: val }));
 
   return (
     <div>
@@ -259,11 +246,11 @@ export default function PerformancePage() {
               <div style={{ background: '#f8fafc', borderRadius: '10px', padding: '16px', marginBottom: '16px' }}>
                 <div style={{ fontSize: '13px', fontWeight: '700', color: '#1e293b', marginBottom: '14px' }}>Ratings (1–5)</div>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-                  <RatingInput label="Technical Skills"   name="technicalSkills"/>
-                  <RatingInput label="Communication"      name="communication"/>
-                  <RatingInput label="Teamwork"           name="teamwork"/>
-                  <RatingInput label="Productivity"       name="productivity"/>
-                  <RatingInput label="Leadership"         name="leadership"/>
+                  <RatingInput label="Technical Skills"   name="technicalSkills" value={form.technicalSkills} onChange={handleRatingChange}/>
+                  <RatingInput label="Communication"      name="communication" value={form.communication} onChange={handleRatingChange}/>
+                  <RatingInput label="Teamwork"           name="teamwork" value={form.teamwork} onChange={handleRatingChange}/>
+                  <RatingInput label="Productivity"       name="productivity" value={form.productivity} onChange={handleRatingChange}/>
+                  <RatingInput label="Leadership"         name="leadership" value={form.leadership} onChange={handleRatingChange}/>
                 </div>
               </div>
 
@@ -296,6 +283,24 @@ export default function PerformancePage() {
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+function RatingInput({ label, name, value, onChange }) {
+  return (
+    <div>
+      <label style={{ fontSize: '12px', fontWeight: '600', color: '#374151', display: 'block', marginBottom: '5px' }}>
+        {label} ({value}/5)
+      </label>
+      <input
+        type="range" min="1" max="5" value={value || 3}
+        onChange={e => onChange(name, e.target.value)}
+        style={{ width: '100%' }}
+      />
+      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '10px', color: '#94a3b8' }}>
+        <span>Poor</span><span>Average</span><span>Excellent</span>
+      </div>
     </div>
   );
 }

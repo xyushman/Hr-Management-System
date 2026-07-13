@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import api from '@/lib/axios';
 import toast from 'react-hot-toast';
 
@@ -61,16 +61,19 @@ export default function TrainingPage() {
   const [feedback, setFeedback]           = useState('');
   const [completingId, setCompletingId]   = useState(null);
 
-  useEffect(() => { fetchTrainings(); }, []);
-
-  const fetchTrainings = async () => {
+  const fetchTrainings = useCallback(async () => {
     setLoading(true);
     try {
       const res = await api.get('/api/trainings');
       setTrainings(res.data?.data?.content || []);
     } catch { toast.error('Failed to load trainings'); }
     finally { setLoading(false); }
-  };
+  }, []);
+
+  useEffect(() => {
+    const timer = setTimeout(() => { fetchTrainings(); }, 0);
+    return () => clearTimeout(timer);
+  }, [fetchTrainings]);
 
   const fetchEnrollments = async (trainingId) => {
     setLoadingEnroll(true);

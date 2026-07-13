@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   getAllEmployees,
   getPayrollByMonth,
@@ -33,22 +33,14 @@ export default function PayrollPage() {
     year: currentYear,
   });
 
-  useEffect(() => {
-    fetchEmployees();
-  }, []);
-
-  useEffect(() => {
-    fetchPayroll();
-  }, [month, year]);
-
-  const fetchEmployees = async () => {
+  const fetchEmployees = useCallback(async () => {
     try {
       const res = await getAllEmployees(0, 100);
       setEmployees(res.data?.data?.content || []);
     } catch {}
-  };
+  }, []);
 
-  const fetchPayroll = async () => {
+  const fetchPayroll = useCallback(async () => {
     setLoading(true);
     try {
       const res = await getPayrollByMonth(month, year);
@@ -61,7 +53,17 @@ export default function PayrollPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [month, year]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => { fetchEmployees(); }, 0);
+    return () => clearTimeout(timer);
+  }, [fetchEmployees]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => { fetchPayroll(); }, 0);
+    return () => clearTimeout(timer);
+  }, [fetchPayroll]);
 
   const handleGenerate = async (e) => {
     e.preventDefault();

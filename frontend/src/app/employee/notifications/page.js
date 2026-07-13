@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   getMyNotifications,
   getUnreadCount,
@@ -7,6 +7,18 @@ import {
 } from '@/lib/employeeApi';
 import api from '@/lib/axios';
 import toast from 'react-hot-toast';
+
+function formatTimeAgo(dateStr, now) {
+  if (!dateStr) return '';
+  const diff = now - new Date(dateStr).getTime();
+  const mins = Math.floor(diff / 60000);
+  const hours = Math.floor(diff / 3600000);
+  const days = Math.floor(diff / 86400000);
+  if (mins < 1)   return 'Just now';
+  if (mins < 60)  return `${mins}m ago`;
+  if (hours < 24) return `${hours}h ago`;
+  return `${days}d ago`;
+}
 
 export default function NotificationsPage() {
   const [notifications, setNotifications] = useState([]);
@@ -17,11 +29,14 @@ export default function NotificationsPage() {
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
 
-  useEffect(() => {
-    fetchNotifications();
-  }, [page, filter]);
+  const [now, setNow] = useState(() => Date.now());
 
-  const fetchNotifications = async () => {
+  useEffect(() => {
+    const timer = setInterval(() => setNow(Date.now()), 60000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const fetchNotifications = useCallback(async () => {
     setLoading(true);
     try {
       const [notifRes, unreadRes] = await Promise.allSettled([
@@ -44,7 +59,12 @@ export default function NotificationsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filter, page]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => { fetchNotifications(); }, 0);
+    return () => clearTimeout(timer);
+  }, [fetchNotifications]);
 
   const handleMarkRead = async (id) => {
     try {
@@ -88,17 +108,6 @@ export default function NotificationsPage() {
     return '🔔';
   };
 
-  const getTimeAgo = (dateStr) => {
-    if (!dateStr) return '';
-    const diff = Date.now() - new Date(dateStr).getTime();
-    const mins = Math.floor(diff / 60000);
-    const hours = Math.floor(diff / 3600000);
-    const days = Math.floor(diff / 86400000);
-    if (mins < 1)   return 'Just now';
-    if (mins < 60)  return `${mins}m ago`;
-    if (hours < 24) return `${hours}h ago`;
-    return `${days}d ago`;
-  };
 
   return (
     <div>
@@ -245,7 +254,7 @@ export default function NotificationsPage() {
                     {n.message}
                   </div>
                   <div style={{ fontSize: '11px', color: '#94a3b8' }}>
-                    {getTimeAgo(n.createdAt)}
+                    {formatTimeAgo(n.createdAt, now)}
                   </div>
                 </div>
 

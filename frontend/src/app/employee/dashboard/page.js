@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useSelector } from 'react-redux';
 import {
   getMyAttendance, checkIn, checkOut,
@@ -68,11 +68,7 @@ export default function EmployeeDashboard() {
   const [checkingIn, setCheckingIn] = useState(false);
   const [checkingOut, setCheckingOut] = useState(false);
 
-  useEffect(() => {
-    fetchAll();
-  }, []);
-
-  const fetchAll = async () => {
+  const fetchAll = useCallback(async () => {
     setLoading(true);
     try {
       const [attRes, leaveRes, balRes, notifRes, unreadRes] = await Promise.allSettled([
@@ -107,7 +103,12 @@ export default function EmployeeDashboard() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    const timer = setTimeout(() => { fetchAll(); }, 0);
+    return () => clearTimeout(timer);
+  }, [fetchAll]);
 
   const handleCheckIn = async () => {
     setCheckingIn(true);
@@ -147,7 +148,7 @@ export default function EmployeeDashboard() {
           Dashboard
         </h1>
         <p style={{ fontSize: '13px', color: '#94a3b8' }}>
-          Welcome back, {user?.name}! Here's your overview for today.
+          Welcome back, {user?.name}! Here&apos;s your overview for today.
         </p>
       </div>
 
@@ -187,7 +188,7 @@ export default function EmployeeDashboard() {
             {/* Today Attendance */}
             <div style={{ background: 'white', borderRadius: '12px', padding: '20px', border: '1px solid #e2e8f0', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
               <h3 style={{ fontSize: '15px', fontWeight: '700', color: '#1e293b', marginBottom: '16px' }}>
-                📅 Today's Attendance
+                📅 Today&apos;s Attendance
               </h3>
               <div style={{ display: 'flex', justifyContent: 'space-around', marginBottom: '20px' }}>
                 <div style={{ textAlign: 'center' }}>
