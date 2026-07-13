@@ -2,7 +2,7 @@ package com.hrms.controller;
 
 import com.hrms.dto.ApiResponse;
 import com.hrms.dto.EmployeeDTOs;
-import com.hrms.service.impl.EmployeeService;
+import com.hrms.service.EmployeeService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -79,4 +79,11 @@ public class EmployeeController {
         return ResponseEntity.ok(ApiResponse.success("Search results",
                 employeeService.search(q, PageRequest.of(page, size))));
     }
+    @GetMapping("/managers")
+    @Operation(summary = "Get all managers and HR employees")
+    public ResponseEntity<ApiResponse<java.util.List<EmployeeDTOs.Response>>> getManagers() {
+        return ResponseEntity.ok(ApiResponse.success("Managers fetched",
+                employeeService.getManagers()));
+    }
+
 }

@@ -1,25 +1,34 @@
 package com.hrms.repository;
 
-import com.hrms.entity.Employee;
 import com.hrms.entity.LeaveRequest;
+import com.hrms.entity.LeaveRequest.ApprovalStage;
+import com.hrms.entity.Employee;
 import com.hrms.enums.LeaveStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
+import org.springframework.data.jpa.repository.Query;
 
-import java.time.LocalDate;
 import java.util.List;
 
-@Repository
-public interface LeaveRequestRepository extends JpaRepository<LeaveRequest, Long> {
-    Page<LeaveRequest> findByEmployee(Employee employee, Pageable pageable);
-    Page<LeaveRequest> findByStatus(LeaveStatus status, Pageable pageable);
-    Page<LeaveRequest> findByEmployeeAndStatus(Employee employee, LeaveStatus status, Pageable pageable);
+public interface LeaveRequestRepository
+        extends JpaRepository<LeaveRequest, Long> {
 
-    List<LeaveRequest> findByEmployeeAndStatusAndStartDateBetween(
-            Employee employee, LeaveStatus status, LocalDate from, LocalDate to);
+    Page<LeaveRequest> findByEmployee(
+            Employee emp, Pageable pageable);
 
-    long countByEmployeeAndStatusAndStartDateBetween(
-            Employee employee, LeaveStatus status, LocalDate from, LocalDate to);
+    Page<LeaveRequest> findByStatus(
+            LeaveStatus status, Pageable pageable);
+
+    Page<LeaveRequest> findByStatusIn(
+            List<LeaveStatus> statuses, Pageable pageable);
+
+
+    Page<LeaveRequest> findByApprovalStageIn(
+            List<ApprovalStage> stages, Pageable pageable);
+
+    @Query("SELECT l FROM LeaveRequest l WHERE " +
+            "l.employee = :employee")
+    List<LeaveRequest> findAllByEmployee(
+            Employee employee);
 }

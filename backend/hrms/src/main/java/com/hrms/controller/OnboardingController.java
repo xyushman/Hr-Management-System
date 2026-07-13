@@ -3,7 +3,7 @@ package com.hrms.controller;
 import com.hrms.dto.ApiResponse;
 import com.hrms.dto.OnboardingDTOs;
 import com.hrms.entity.Employee;
-import com.hrms.service.impl.OnboardingService;
+import com.hrms.service.OnboardingService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;

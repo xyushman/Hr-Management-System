@@ -3,7 +3,7 @@ package com.hrms.controller;
 import com.hrms.dto.ApiResponse;
 import com.hrms.dto.RecruitmentDTOs;
 import com.hrms.entity.Employee;
-import com.hrms.service.impl.RecruitmentService;
+import com.hrms.service.RecruitmentService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;

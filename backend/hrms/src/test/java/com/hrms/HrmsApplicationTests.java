@@ -1,7 +1,7 @@
 package com.hrms;
 
 import com.hrms.dto.AuthDTOs;
-import com.hrms.service.impl.AuthService;
+import com.hrms.service.AuthService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;

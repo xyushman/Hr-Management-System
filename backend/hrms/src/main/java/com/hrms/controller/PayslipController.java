@@ -3,7 +3,7 @@ package com.hrms.controller;
 import com.hrms.dto.ApiResponse;
 import com.hrms.dto.PayslipDTOs;
 import com.hrms.entity.Employee;
-import com.hrms.service.impl.PayslipService;
+import com.hrms.service.PayslipService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;

@@ -38,12 +38,12 @@ public class SecurityConfig {
             "/swagger-ui/**",
             "/swagger-ui.html",
             "/api-docs/**",
+            "/api/employees/managers",
             "/v3/api-docs/**"
     };
 
     // Admin/HR only endpoints
     private static final String[] ADMIN_HR_URLS = {
-            "/api/employees",
             "/api/employees/search",
             "/api/payroll/generate",
             "/api/payroll/month",
@@ -77,8 +77,8 @@ public class SecurityConfig {
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(PUBLIC_URLS).permitAll()
+                        .requestMatchers("/api/employees/managers").permitAll()
                         .requestMatchers(ADMIN_HR_URLS).hasAnyRole("ADMIN", "HR")
-                        // Everything else just needs to be authenticated (any valid token)
                         .anyRequest().authenticated()
                 )
                 .authenticationProvider(authenticationProvider)

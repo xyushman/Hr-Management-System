@@ -2,8 +2,10 @@ package com.hrms.enums;
 
 public enum LeaveStatus {
     PENDING,
+    MANAGER_PENDING,
+    HR_PENDING,
     APPROVED,
     REJECTED,
-    CANCELLATION_PENDING,
-    CANCELLED
+    CANCELLED,
+    CANCELLATION_PENDING
 }

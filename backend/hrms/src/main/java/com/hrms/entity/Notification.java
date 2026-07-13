@@ -24,12 +24,11 @@ public class Notification {
     private String message;
 
     @Enumerated(EnumType.STRING)
-    private NotificationType type;     //leave applied,leaveapproved,leave rejected
+    private NotificationType type;
 
-    private String referenceType;      // leave request
-    private Long referenceId;          // example of leaveRequest.id
+    private String referenceType;
+    private Long referenceId;
 
-    // "read" is a reserved word in MySQL — mapped to column "is_read" instead
     @Column(name = "is_read")
     @Builder.Default
     private boolean isRead = false;
@@ -37,10 +36,22 @@ public class Notification {
     private LocalDateTime createdAt;
 
     @PrePersist
-    protected void onCreate() { createdAt = LocalDateTime.now(); }
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+    }
 
     public enum NotificationType {
-        LEAVE_APPLIED, LEAVE_APPROVED, LEAVE_REJECTED, LEAVE_CANCELLED,
-        ATTENDANCE_REMINDER, PAYROLL_GENERATED, GENERAL
+        LEAVE_APPLIED,
+        LEAVE_APPROVED,
+        LEAVE_REJECTED,
+        LEAVE_CANCELLED,
+        ATTENDANCE_REMINDER,
+        PAYROLL_GENERATED,
+        PERFORMANCE_REVIEWED,
+        TRAINING_ENROLLED,
+        TRAINING_COMPLETED,
+        ONBOARDING_INITIATED,
+        JOB_APPLICATION,
+        GENERAL
     }
 }
