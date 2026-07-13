@@ -1,12 +1,10 @@
-
-updated
-# 🏢 HRMS Backend — Spring Boot 3.2.5 + MySQL
+# 🏢 HRMS Backend — Spring Boot 3.2.5 + MySQL / H2
 
 ## Tech Stack
 | Layer | Technology |
 |-------|-----------|
 | Backend | Spring Boot 3.2.5, Java 17 |
-| Database | MySQL 8.x |
+| Database | MySQL 8.x (Production/AWS) & H2 Embedded DB (Local Development) |
 | Security | Spring Security + JWT (JJWT) |
 | Docs | Swagger UI (SpringDoc OpenAPI 3) |
 | Build | Maven |
@@ -79,37 +77,83 @@ hrms/
 
 ---
 
-## ⚙️ Setup Instructions
+## ⚙️ Setup & Running Instructions
 
-### 1. MySQL Setup
-```sql
-CREATE DATABASE hrms_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-```
+The project supports **multiple execution profiles** so it can run instantly on a local laptop without external dependencies, while remaining 100% ready for AWS production deployment.
 
-### 2. Update application.properties
-```properties
-spring.datasource.url=jdbc:mysql://localhost:3306/hrms_db (here put your schema name)
-spring.datasource.username=root
-spring.datasource.password=YOUR_PASSWORD
+---
 
-# File upload limits
-spring.servlet.multipart.max-file-size=10MB
-spring.servlet.multipart.max-request-size=10MB
+### Option A: Run Locally (H2 Embedded Database — Zero Setup)
+By default, `application.properties` activates `spring.profiles.active=local`. This uses an H2 embedded database running in **MySQL compatibility mode (`MODE=MySQL`)** and saves data directly to `./data/hrms_db` inside the project folder.
 
-# Azure AD (disabled until real values added)
-spring.cloud.azure.active-directory.enabled=false
-```
+1. **Open Terminal** inside `backend/hrms`:
+   ```bash
+   cd backend/hrms
+   ```
+2. **Start the application:**
+   ```bash
+   mvn spring-boot:run
+   ```
+3. **Access Swagger UI & API:**
+   - URL: `http://localhost:8080/swagger-ui.html`
+   - H2 Console (optional): `http://localhost:8080/h2-console` (`JDBC URL: jdbc:h2:file:./data/hrms_db`, User: `sa`, Password: empty)
 
-### 3. Run the project
+---
+
+### Option B: Run with MySQL (Local or Docker)
+To use a real MySQL server instead of H2:
+
+1. **Update `application.properties`:**
+   Comment out or remove `spring.profiles.active=local`:
+   ```properties
+   # spring.profiles.active=local
+   ```
+2. **Setup MySQL (`localhost:3306`):**
+   - **Using Windows MySQL Service:**
+     ```sql
+     CREATE DATABASE hrms_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+     ```
+   - **OR using Docker in one command:**
+     ```bash
+     docker run --name hrms-mysql -p 3306:3306 -e MYSQL_DATABASE=hrms_db -e MYSQL_ROOT_PASSWORD=hussain@123 -d mysql:8.0
+     ```
+3. **Run the project:**
+   ```bash
+   mvn spring-boot:run
+   ```
+
+---
+
+### Option C: AWS Deployment (Docker / ECR / ECS + Amazon RDS)
+The repository includes a multi-stage `Dockerfile` optimized for AWS container services (`Amazon ECS / Fargate`, `EKS`, or `EC2`).
+
+#### 1. Build & Push Docker Image (`Amazon ECR`)
 ```bash
-mvn clean install
-mvn spring-boot:run
+# Build production image locally
+docker build -t hrms-backend .
+
+# Tag & push to AWS ECR
+docker tag hrms-backend:latest <aws-account-id>.dkr.ecr.<region>.amazonaws.com/hrms-backend:latest
+docker push <aws-account-id>.dkr.ecr.<region>.amazonaws.com/hrms-backend:latest
 ```
 
-### 4. Swagger UI
-```
-http://localhost:8080/swagger-ui.html
-```
+#### 2. Configure AWS Environment Variables (ECS / EC2)
+When running your container on AWS alongside an **Amazon RDS MySQL 8.0** database, inject the following environment variables (which automatically override local configurations):
+
+| AWS Environment Variable | Value Example |
+|---|---|
+| `SPRING_DATASOURCE_URL` | `jdbc:mysql://hrms-db.cp5xyz.us-east-1.rds.amazonaws.com:3306/hrms_db?useSSL=true` |
+| `SPRING_DATASOURCE_USERNAME` | Your RDS master username (e.g., `admin`) |
+| `SPRING_DATASOURCE_PASSWORD` | Your RDS master password |
+| `PORT` | `8080` |
+| `JAVA_OPTS` | `-XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0` |
+
+---
+
+## 🗂️ About Build Output (`target/` folder)
+* When you compile (`mvn compile` or `mvn package`), Maven creates the `target/` directory containing `.class` files and the standalone executable `.jar`.
+* Running `mvn clean` safely deletes the `target/` directory to ensure a fresh build.
+* In Docker deployments (`Dockerfile:L32`), Stage 1 (`AS build`) generates `target/hrms-backend-*.jar`, and Stage 2 copies it into `app.jar` for the lightweight runtime image.
 
 ---
 
