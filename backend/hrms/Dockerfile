@@ -40,23 +40,19 @@ USER hrmsuser
 # Expose the port configured in application.properties (default: 8080)
 EXPOSE 8080
 
-# Build arguments for runtime defaults
+# Build arguments for non-sensitive runtime defaults
 ARG PORT=8080
 ARG SPRING_PROFILES_ACTIVE=default
 ARG SPRING_DATASOURCE_URL=jdbc:mysql://localhost:3306/hrms_db
 ARG SPRING_DATASOURCE_USERNAME=root
-ARG DB_PASSWORD=""
 ARG JAVA_OPTS="-XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0"
-ARG JWT_SECRET="hrms_super_secret_key_at_least_256_bits_long_for_hs256_algorithm_2024"
 
-# Environment variables bound to ARGs (can be overridden at runtime via docker run -e or docker-compose)
+# Environment variables bound to ARGs (sensitive variables like SPRING_DATASOURCE_PASSWORD and JWT_SECRET are injected securely at runtime via --env-file or -e)
 ENV PORT=${PORT} \
     SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE} \
     SPRING_DATASOURCE_URL=${SPRING_DATASOURCE_URL} \
     SPRING_DATASOURCE_USERNAME=${SPRING_DATASOURCE_USERNAME} \
-    SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD} \
-    JAVA_OPTS=${JAVA_OPTS} \
-    JWT_SECRET=${JWT_SECRET}
+    JAVA_OPTS=${JAVA_OPTS}
 
 # Run the Spring Boot application
 ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]
