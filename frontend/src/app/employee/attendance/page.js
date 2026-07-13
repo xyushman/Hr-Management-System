@@ -46,6 +46,7 @@ export default function AttendancePage() {
       setTodayAtt(todayRecord || null);
     } catch (err) {
       toast.error('Failed to load attendance');
+      console.error(err);
     } finally {
       setLoading(false);
     }
@@ -64,6 +65,7 @@ export default function AttendancePage() {
       fetchAttendance();
     } catch (err) {
       toast.error(err.response?.data?.message || 'Check-in failed');
+      console.error(err);
     } finally {
       setCheckingIn(false);
     }
@@ -79,6 +81,7 @@ export default function AttendancePage() {
       fetchAttendance();
     } catch (err) {
       toast.error(err.response?.data?.message || 'Check-out failed');
+      console.error(err);
     } finally {
       setCheckingOut(false);
     }
@@ -286,14 +289,11 @@ export default function AttendancePage() {
 
             {/* Table Rows */}
             {records.map((r, i) => (
-              <div key={i} style={{
+              <div key={r.id || r.date || i} style={{
                 display: 'grid', gridTemplateColumns: '1.5fr 1fr 1fr 1fr 1fr 1.5fr',
                 padding: '12px 20px', borderBottom: '1px solid #f1f5f9',
                 alignItems: 'center',
-              }}
-                onMouseEnter={e => e.currentTarget.style.background = '#f8fafc'}
-                onMouseLeave={e => e.currentTarget.style.background = 'white'}
-              >
+              }}>
                 <div style={{ fontSize: '13px', fontWeight: '600', color: '#1e293b' }}>
                   {new Date(r.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
                 </div>

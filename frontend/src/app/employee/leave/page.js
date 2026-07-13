@@ -62,8 +62,9 @@ export default function LeavePage() {
       if (balRes.status === 'fulfilled') {
         setBalance(balRes.value.data?.data || []);
       }
-    } catch {
+    } catch (err) {
       toast.error('Failed to load leave data');
+      console.error(err);
     } finally {
       setLoading(false);
     }
@@ -461,16 +462,13 @@ export default function LeavePage() {
         ) : (
           <>
             {leaves.map((l, i) => (
-              <div key={i}
+              <div key={l.id || i}
                 style={{
                   display: 'grid',
                   gridTemplateColumns: '1.5fr 1fr 1fr 0.5fr 1.5fr 1fr 1fr',
                   padding: '13px 20px', borderBottom: '1px solid #f1f5f9',
                   alignItems: 'center',
-                }}
-                onMouseEnter={e => e.currentTarget.style.background = '#f8fafc'}
-                onMouseLeave={e => e.currentTarget.style.background = 'white'}
-              >
+                }}>
                 <div style={{ fontSize: '13px', fontWeight: '600', color: '#1e293b' }}>
                   {l.leaveType} Leave
                 </div>

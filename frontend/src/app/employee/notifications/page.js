@@ -56,6 +56,7 @@ export default function NotificationsPage() {
       }
     } catch (err) {
       toast.error('Failed to load notifications');
+      console.error(err);
     } finally {
       setLoading(false);
     }
@@ -75,6 +76,7 @@ export default function NotificationsPage() {
       setUnreadCount(prev => Math.max(0, prev - 1));
     } catch (err) {
       toast.error('Failed to mark as read');
+      console.error(err);
     }
   };
 
@@ -88,6 +90,7 @@ export default function NotificationsPage() {
       toast.success('All notifications marked as read!');
     } catch (err) {
       toast.error('Failed to mark all as read');
+      console.error(err);
     } finally {
       setMarkingAll(false);
     }
@@ -217,10 +220,7 @@ export default function NotificationsPage() {
                   borderBottom: i < notifications.length - 1 ? '1px solid #f1f5f9' : 'none',
                   background: n.isRead ? 'white' : '#f8fbff',
                   transition: 'background 0.2s',
-                }}
-                onMouseEnter={e => e.currentTarget.style.background = '#f8fafc'}
-                onMouseLeave={e => e.currentTarget.style.background = n.isRead ? 'white' : '#f8fbff'}
-              >
+                }}>
                 {/* Unread dot */}
                 <div style={{ paddingTop: '6px', flexShrink: 0 }}>
                   <div style={{

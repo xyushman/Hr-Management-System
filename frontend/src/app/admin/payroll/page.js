@@ -37,7 +37,9 @@ export default function PayrollPage() {
     try {
       const res = await getAllEmployees(0, 100);
       setEmployees(res.data?.data?.content || []);
-    } catch {}
+    } catch (err) {
+      console.error('Error fetching employees:', err);
+    }
   }, []);
 
   const fetchPayroll = useCallback(async () => {
@@ -276,10 +278,7 @@ export default function PayrollPage() {
               gridTemplateColumns: '2fr 1.2fr 1.2fr 1.2fr 1.2fr 1fr 2fr',
               padding: '13px 20px', borderBottom: '1px solid #f1f5f9',
               alignItems: 'center',
-            }}
-              onMouseEnter={e => e.currentTarget.style.background = '#f8fafc'}
-              onMouseLeave={e => e.currentTarget.style.background = 'white'}
-            >
+            }}>
               {/* Employee */}
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <div style={{

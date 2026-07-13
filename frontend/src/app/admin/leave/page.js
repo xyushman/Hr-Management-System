@@ -75,6 +75,7 @@ const fetchData = useCallback(async () => {
         const cancelRes = await getPendingCancellations(page, 10);
         setCancellations(cancelRes.data?.data?.content || []);
       } catch (e) {
+        console.error('Failed to fetch pending cancellations:', e);
         setCancellations([]);
       }
     } else {
@@ -281,10 +282,7 @@ useEffect(() => {
                 gridTemplateColumns: '2fr 1.2fr 1fr 1fr 0.5fr 1.5fr 2fr',
                 padding: '14px 20px', borderBottom: '1px solid #f1f5f9',
                 alignItems: 'center',
-              }}
-                onMouseEnter={e => e.currentTarget.style.background = '#f8fafc'}
-                onMouseLeave={e => e.currentTarget.style.background = 'white'}
-              >
+              }}>
                 {/* Employee */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                   <div style={{

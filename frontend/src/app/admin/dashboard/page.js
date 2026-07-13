@@ -91,6 +91,7 @@ export default function AdminDashboard() {
       }
     } catch (err) {
       toast.error('Failed to load dashboard');
+      console.error(err);
     } finally {
       setLoading(false);
     }
@@ -117,6 +118,7 @@ export default function AdminDashboard() {
       } catch (err) {
         if (active) {
           toast.error('Failed to load dashboard');
+          console.error(err);
           setLoading(false);
         }
       }
@@ -240,7 +242,7 @@ const handleLeaveAction = async (id, action) => {
                 </div>
               ) : (
                 pendingLeaves.map((l, i) => (
-                  <div key={i} style={{ padding: '14px 20px', borderBottom: '1px solid #f1f5f9' }}>
+                  <div key={l.id || i} style={{ padding: '14px 20px', borderBottom: '1px solid #f1f5f9' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
                       <div>
                         <div style={{ fontSize: '13px', fontWeight: '700', color: '#1e293b', marginBottom: '2px' }}>
@@ -309,7 +311,7 @@ const handleLeaveAction = async (id, action) => {
               ) : (
                 <div style={{ maxHeight: '280px', overflowY: 'auto' }}>
                   {todayAttendance.map((a, i) => (
-                    <div key={i} style={{
+                    <div key={a.id || a.employeeId || i} style={{
                       display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                       padding: '10px 20px', borderBottom: '1px solid #f1f5f9',
                     }}>
@@ -361,13 +363,10 @@ const handleLeaveAction = async (id, action) => {
             </div>
 
             {employees.slice(0, 6).map((e, i) => (
-              <div key={i} style={{
+              <div key={e.id || e.employeeCode || i} style={{
                 display: 'grid', gridTemplateColumns: '0.5fr 2fr 1.5fr 1.5fr 1fr 1fr',
                 padding: '12px 20px', borderBottom: '1px solid #f1f5f9', alignItems: 'center',
-              }}
-                onMouseEnter={ev => ev.currentTarget.style.background = '#f8fafc'}
-                onMouseLeave={ev => ev.currentTarget.style.background = 'white'}
-              >
+              }}>
                 <div style={{ fontSize: '12px', color: '#94a3b8', fontWeight: '600' }}>
                   {e.employeeCode}
                 </div>
@@ -412,9 +411,9 @@ const handleLeaveAction = async (id, action) => {
               { label: 'Leave Approvals', icon: '✅', color: '#16a34a', route: '/admin/leave' },
               { label: 'Generate Payroll', icon: '💰', color: '#f59e0b', route: '/admin/payroll' },
               { label: 'Recruitment', icon: '💼', color: '#8b5cf6', route: '/admin/recruitment' },
-            ].map((a, i) => (
+            ].map((a) => (
               <button
-                key={i}
+                key={a.label}
                 onClick={() => router.push(a.route)}
                 style={{
                   background: 'white', border: '1px solid #e2e8f0',
@@ -429,6 +428,14 @@ const handleLeaveAction = async (id, action) => {
                   e.currentTarget.style.transform = 'translateY(-2px)';
                 }}
                 onMouseLeave={e => {
+                  e.currentTarget.style.background = 'white';
+                  e.currentTarget.style.transform = 'translateY(0)';
+                }}
+                onFocus={e => {
+                  e.currentTarget.style.background = '#f8fafc';
+                  e.currentTarget.style.transform = 'translateY(-2px)';
+                }}
+                onBlur={e => {
                   e.currentTarget.style.background = 'white';
                   e.currentTarget.style.transform = 'translateY(0)';
                 }}
