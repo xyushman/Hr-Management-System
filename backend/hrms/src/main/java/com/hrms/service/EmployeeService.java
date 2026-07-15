@@ -8,6 +8,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,6 +32,7 @@ public class EmployeeService {
     private final PasswordEncoder passwordEncoder;
 
     @Transactional
+    @CacheEvict(value = "dashboardData", allEntries = true)
     public EmployeeDTOs.Response createEmployee(EmployeeDTOs.CreateRequest req) {
         if (employeeRepository.existsByEmail(req.getEmail())) {
             throw new EmployeeAlreadyExists(req.getEmail());
@@ -53,6 +56,7 @@ public class EmployeeService {
     }
 
     @org.springframework.transaction.annotation.Transactional(readOnly = true)
+    @Cacheable("dashboardData")
     public Page<EmployeeDTOs.Response> getAllEmployees(Pageable pageable) {
         return employeeRepository.findAll(pageable).map(this::toResponse);
     }
@@ -64,6 +68,7 @@ public class EmployeeService {
     }
 
     @Transactional
+    @CacheEvict(value = "dashboardData", allEntries = true)
     public EmployeeDTOs.Response updateEmployee(Long id, EmployeeDTOs.UpdateRequest req) {
         Employee emp = findById(id);
         if (req.getFirstName() != null)    emp.setFirstName(req.getFirstName());
@@ -78,7 +83,9 @@ public class EmployeeService {
         return toResponse(employeeRepository.save(emp));
     }
 
+
     @Transactional
+    @CacheEvict(value = "dashboardData", allEntries = true)
     public void deactivateEmployee(Long id) {
         Employee emp = findById(id);
         emp.setActive(false);

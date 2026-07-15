@@ -6,6 +6,8 @@ import com.hrms.entity.Employee;
 import com.hrms.enums.AttendanceStatus;
 import com.hrms.repository.AttendanceRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -22,6 +24,7 @@ public class AttendanceService {
     private final EmployeeService employeeService;
 
     @Transactional
+    @CacheEvict(value = "dashboardData", allEntries = true)
     public AttendanceDTOs.Response checkIn(Long employeeId, AttendanceDTOs.CheckInRequest req) {
         Employee emp = employeeService.findById(employeeId);
         LocalDate date = req.getDate() != null ? req.getDate() : LocalDate.now();
@@ -43,6 +46,7 @@ public class AttendanceService {
     }
 
     @Transactional
+    @CacheEvict(value = "dashboardData", allEntries = true)
     public AttendanceDTOs.Response checkOut(Long employeeId, String remarks) {
         Employee emp = employeeService.findById(employeeId);
         LocalDate today = LocalDate.now();
@@ -67,12 +71,14 @@ public class AttendanceService {
     }
 
     @Transactional(readOnly = true)
+    @Cacheable("dashboardData")
     public Page<AttendanceDTOs.Response> getMyAttendance(Long employeeId, Pageable pageable) {
         Employee emp = employeeService.findById(employeeId);
         return attendanceRepo.findByEmployee(emp, pageable).map(this::toResponse);
     }
 
     @Transactional(readOnly = true)
+    @Cacheable("dashboardData")
     public Page<AttendanceDTOs.Response> getAttendanceByDate(LocalDate date, Pageable pageable) {
         return attendanceRepo.findByDate(date, pageable).map(this::toResponse);
     }

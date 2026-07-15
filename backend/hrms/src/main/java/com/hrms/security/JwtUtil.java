@@ -6,6 +6,7 @@ import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import jakarta.annotation.PostConstruct;
 import java.security.Key;
 import java.util.Date;
 
@@ -21,8 +22,15 @@ public class JwtUtil {
     @Value("${jwt.refresh-expiration}")
     private long refreshExpiration;
 
+    private Key cachedKey;
+
+    @PostConstruct
+    public void init() {
+        this.cachedKey = Keys.hmacShaKeyFor(secret.getBytes());
+    }
+
     private Key getSigningKey() {
-        return Keys.hmacShaKeyFor(secret.getBytes());
+        return cachedKey != null ? cachedKey : Keys.hmacShaKeyFor(secret.getBytes());
     }
 
     public String generateToken(Employee employee) {

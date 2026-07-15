@@ -10,6 +10,8 @@ import com.hrms.enums.Role;
 import com.hrms.repository.EmployeeRepository;
 import com.hrms.repository.LeaveRequestRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -30,7 +32,7 @@ public class LeaveService {
     private final EmployeeService employeeService;
     private final LeaveBalanceService leaveBalanceService;
     private final NotificationService notificationService;
-    private final EmployeeRepository employeeRepository; // ← NEW
+    private final EmployeeRepository employeeRepository;
 
     // ── Helper: notify all active ADMIN + HR ──
     private void notifyAllAdmins(
@@ -56,6 +58,7 @@ public class LeaveService {
     }
 
     @Transactional
+    @CacheEvict(value = "dashboardData", allEntries = true)
     public LeaveDTOs.Response applyLeave(
             Long employeeId,
             LeaveDTOs.CreateRequest req) {
@@ -133,6 +136,7 @@ public class LeaveService {
     }
 
     @Transactional
+    @CacheEvict(value = "dashboardData", allEntries = true)
     public LeaveDTOs.Response managerAction(
             Long leaveId, Long managerId,
             LeaveDTOs.ActionRequest req) {
@@ -191,6 +195,7 @@ public class LeaveService {
     }
 
     @Transactional
+    @CacheEvict(value = "dashboardData", allEntries = true)
     public LeaveDTOs.Response hrAction(
             Long leaveId, Long hrId,
             LeaveDTOs.ActionRequest req) {
@@ -269,6 +274,7 @@ public class LeaveService {
     }
 
     @Transactional
+    @CacheEvict(value = "dashboardData", allEntries = true)
     public LeaveDTOs.Response requestCancellation(
             Long leaveId, Long employeeId,
             LeaveDTOs.CancelRequest req) {
@@ -350,6 +356,7 @@ public class LeaveService {
     }
 
     @Transactional
+    @CacheEvict(value = "dashboardData", allEntries = true)
     public LeaveDTOs.Response cancelAction(
             Long leaveId, Long hrId,
             LeaveDTOs.CancelActionRequest req) {
@@ -410,6 +417,7 @@ public class LeaveService {
     }
 
     @Transactional(readOnly = true)
+    @Cacheable("dashboardData")
     public Page<LeaveDTOs.Response> getPendingLeaves(Pageable pageable) {
         return leaveRepo.findByApprovalStageIn(
                 java.util.List.of(
