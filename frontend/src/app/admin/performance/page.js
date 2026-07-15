@@ -118,12 +118,13 @@ export default function PerformancePage() {
       </div>
 
       {/* Reviews Table */}
-      <div style={{ background: 'white', borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 1px 4px rgba(0,0,0,0.04)', overflow: 'hidden' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr', padding: '10px 20px', background: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
-          {['Employee', 'Review Period', 'Overall Rating', 'Status', 'Review Date'].map(h => (
-            <div key={h} style={{ fontSize: '11px', fontWeight: '700', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{h}</div>
-          ))}
-        </div>
+      <div className="table-responsive" style={{ background: 'white', borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
+        <div className="admin-data-table" style={{ minWidth: '760px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr', padding: '10px 20px', background: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
+            {['Employee', 'Review Period', 'Overall Rating', 'Status', 'Review Date'].map(h => (
+              <div key={h} style={{ fontSize: '11px', fontWeight: '700', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{h}</div>
+            ))}
+          </div>
 
         {loading ? (
           <div style={{ padding: '60px', textAlign: 'center', color: '#94a3b8' }}>Loading...</div>
@@ -207,6 +208,7 @@ export default function PerformancePage() {
             </div>
           ))
         )}
+        </div>
       </div>
 
       {/* Create Review Modal */}

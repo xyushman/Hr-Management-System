@@ -273,19 +273,20 @@ export default function AttendancePage() {
             No attendance records found
           </div>
         ) : (
-          <>
-            {/* Table Header */}
-            <div style={{
-              display: 'grid', gridTemplateColumns: '1.5fr 1fr 1fr 1fr 1fr 1.5fr',
-              padding: '10px 20px', background: '#f8fafc',
-              borderBottom: '1px solid #e2e8f0',
-            }}>
-              {['Date', 'Check In', 'Check Out', 'Work Hours', 'Status', 'Remarks'].map(h => (
-                <div key={h} style={{ fontSize: '11px', fontWeight: '700', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                  {h}
-                </div>
-              ))}
-            </div>
+          <div className="table-responsive">
+            <div className="admin-data-table" style={{ minWidth: '760px' }}>
+              {/* Table Header */}
+              <div style={{
+                display: 'grid', gridTemplateColumns: '1.5fr 1fr 1fr 1fr 1fr 1.5fr',
+                padding: '10px 20px', background: '#f8fafc',
+                borderBottom: '1px solid #e2e8f0',
+              }}>
+                {['Date', 'Check In', 'Check Out', 'Work Hours', 'Status', 'Remarks'].map(h => (
+                  <div key={h} style={{ fontSize: '11px', fontWeight: '700', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                    {h}
+                  </div>
+                ))}
+              </div>
 
             {/* Table Rows */}
             {records.map((r, i) => (
@@ -312,6 +313,7 @@ export default function AttendancePage() {
                 </div>
               </div>
             ))}
+          </div>
 
             {/* Pagination */}
             {totalPages > 1 && (
@@ -335,7 +337,7 @@ export default function AttendancePage() {
                 </button>
               </div>
             )}
-          </>
+          </div>
         )}
       </div>
     </div>

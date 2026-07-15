@@ -238,11 +238,10 @@ useEffect(() => {
       </div>
 
       {/* Table */}
-      <div style={{
+      <div className="table-responsive" style={{
         background: 'white', borderRadius: '12px',
         border: '1px solid #e2e8f0',
         boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
-        overflow: 'hidden',
       }}>
         {/* Table Header */}
         <div style={{

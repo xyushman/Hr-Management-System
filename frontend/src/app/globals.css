@@ -181,6 +181,39 @@ html, body {
     grid-template-columns: repeat(2, 1fr) !important;
     gap: 12px !important;
   }
+
+  /* =========================================================
+     UNIVERSAL DOM ATTRIBUTE OVERRIDES FOR EVERY PAGE (< 768px)
+     ========================================================= */
+  /* 1. Convert ANY 2-column or split layout grid into a single vertical column on mobile */
+  div[style*="grid-template-columns: 1fr 1fr"],
+  div[style*="grid-template-columns: 1fr 1.3fr"],
+  div[style*="grid-template-columns: 1fr 1.4fr"],
+  div[style*="grid-template-columns: 1fr 1.5fr"],
+  div[style*="grid-template-columns: 380px 1fr"] {
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+  }
+
+  /* 2. Convert ANY 3-column, 4-column, or 5-column grid into 2x2 or stacked grid on mobile */
+  div[style*="grid-template-columns: repeat(3, 1fr)"],
+  div[style*="grid-template-columns: repeat(4, 1fr)"],
+  div[style*="grid-template-columns: repeat(5, 1fr)"],
+  div[style*="grid-template-columns: 1fr 1fr 1fr"] {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 12px !important;
+  }
+
+  /* 3. Make ALL Modal & Overlay dialog boxes fit mobile phone screens cleanly */
+  div[style*="max-height: 90vh"],
+  div[style*="maxHeight: '90vh'"] {
+    padding: 20px 16px !important;
+    width: calc(100vw - 24px) !important;
+    max-width: calc(100vw - 24px) !important;
+    max-height: 85vh !important;
+    border-radius: 16px !important;
+    box-sizing: border-box !important;
+  }
 }
 
 /* Tiny Mobile Screens (< 480px / iPhone SE & Androids) */
@@ -199,6 +232,14 @@ html, body {
     margin: 8px !important;
     width: calc(100vw - 24px) !important;
     border-radius: 20px !important;
+  }
+
+  div[style*="grid-template-columns: repeat(3, 1fr)"],
+  div[style*="grid-template-columns: repeat(4, 1fr)"],
+  div[style*="grid-template-columns: repeat(5, 1fr)"],
+  div[style*="grid-template-columns: 1fr 1fr 1fr"] {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
   }
 }
 
@@ -237,13 +278,29 @@ html, body {
   box-sizing: border-box !important;
 }
 
-.admin-employees-table {
-  min-width: 680px !important;
+/* Ensure data table grids don't compress past legible column widths */
+.admin-employees-table,
+div[style*="0.5fr 2fr 1.5fr"],
+div[style*="0.6fr 2fr 1.2fr"],
+div[style*="2fr 1.2fr 1fr"],
+div[style*="2fr 1.2fr 1.2fr"],
+div[style*="2fr 1fr 1fr"],
+div[style*="1.5fr 1fr 1fr"],
+div[style*="grid-template-columns: 0.5fr 2fr"],
+div[style*="grid-template-columns: 0.6fr 2fr"],
+div[style*="grid-template-columns: 2fr 1.2fr"],
+div[style*="grid-template-columns: 2fr 1fr 1fr"],
+div[style*="grid-template-columns: 1.5fr 1fr"] {
+  min-width: 720px !important;
   width: 100% !important;
-  display: block !important;
 }
 
-.admin-employees-table > div > div {
+/* Ensure columns inside data table rows never wrap or smash together */
+div[style*="0.5fr 2fr"] > div,
+div[style*="0.6fr 2fr"] > div,
+div[style*="2fr 1.2fr"] > div,
+div[style*="2fr 1fr 1fr"] > div,
+div[style*="1.5fr 1fr"] > div {
   white-space: nowrap !important;
 }
 
