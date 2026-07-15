@@ -8,37 +8,17 @@ output "public_subnets" {
   description = "List of IDs of public subnets"
 }
 
-output "private_subnets" {
-  value       = module.vpc.private_subnets
-  description = "List of IDs of private subnets"
+output "app_server_public_ip" {
+  value       = aws_eip.app_server_eip.public_ip
+  description = "Static Elastic IPv4 of the Spring Boot API server on EC2 t3a.small"
 }
 
-output "database_subnets" {
-  value       = module.vpc.database_subnets
-  description = "List of IDs of database subnets"
+output "frontend_cloudfront_url" {
+  value       = "https://${aws_cloudfront_distribution.frontend.domain_name}"
+  description = "Global CloudFront CDN HTTPS URL for accessing the React HRMS Frontend"
 }
 
-output "nat_gateway_ips" {
-  value       = module.vpc.nat_public_ips
-  description = "Public Elastic IPs created for AWS NAT Gateway"
-}
-
-output "jenkins_public_ip" {
-  value       = aws_instance.jenkins.public_ip
-  description = "Public IP address of the Jenkins CI server on EC2"
-}
-
-output "rds_endpoint" {
-  value       = aws_db_instance.hr_db.endpoint
-  description = "Connection endpoint for HRMS MySQL RDS instance"
-}
-
-output "backend_ecr_repository_url" {
-  value       = aws_ecr_repository.backend.repository_url
-  description = "URL of the backend Docker image ECR repository"
-}
-
-output "frontend_ecr_repository_url" {
-  value       = aws_ecr_repository.frontend.repository_url
-  description = "URL of the frontend Docker image ECR repository"
+output "frontend_s3_bucket_name" {
+  value       = aws_s3_bucket.frontend.bucket
+  description = "S3 bucket name where 'npm run build' React static files should be synced"
 }

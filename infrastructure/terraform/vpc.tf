@@ -16,10 +16,11 @@ module "vpc" {
   # Isolated DB subnets — for RDS, no internet route at all
   database_subnets = ["10.0.21.0/24", "10.0.22.0/24"]
 
-  # --- Cost-saving setting for now ---
-  enable_nat_gateway = true
-  single_nat_gateway = true # 1 NAT shared across all AZs (cheap, testing phase)
-  # For production later, replace above two lines with:
+  # --- Cost-saving setting: NAT Gateway disabled to save $32.85/month ---
+  enable_nat_gateway = false
+  single_nat_gateway = false
+  # For enterprise EKS production later (when moved back from Future/), replace above with:
+  # enable_nat_gateway     = true
   # single_nat_gateway     = false
   # one_nat_gateway_per_az = true
 
@@ -27,13 +28,7 @@ module "vpc" {
   enable_dns_hostnames         = true
   enable_dns_support           = true
 
-  # Required tags for EKS to auto-discover subnets later
-  public_subnet_tags = {
-    "kubernetes.io/role/elb" = "1"
-  }
-  private_subnet_tags = {
-    "kubernetes.io/role/internal-elb" = "1"
-  }
+  # Note: When deploying EKS later from Future/, add back public_subnet_tags and private_subnet_tags with kubernetes.io/role/elb = "1"
 
   tags = {
     Project = var.project_name
