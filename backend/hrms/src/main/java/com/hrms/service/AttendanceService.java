@@ -34,7 +34,7 @@ public class AttendanceService {
             throw new IllegalStateException("Already checked in for " + date);
         }
 
-        LocalTime checkIn = (req != null && req.getCheckIn() != null) ? req.getCheckIn() : LocalTime.now(istZone);
+        LocalTime checkIn = (req != null && req.getCheckIn() != null) ? req.getCheckIn() : LocalTime.now(istZone).withNano(0);
 
         Attendance att = Attendance.builder()
                 .employee(emp)
@@ -57,7 +57,7 @@ public class AttendanceService {
                 .or(() -> attendanceRepo.findFirstByEmployeeAndCheckOutIsNullOrderByDateDesc(emp))
                 .orElseThrow(() -> new com.hrms.exception.AttendanceRecordNotFound());
 
-        LocalTime checkOut = (req != null && req.getCheckOut() != null) ? req.getCheckOut() : LocalTime.now(istZone);
+        LocalTime checkOut = (req != null && req.getCheckOut() != null) ? req.getCheckOut() : LocalTime.now(istZone).withNano(0);
         att.setCheckOut(checkOut);
 
         double hours = att.getCheckIn().until(checkOut, java.time.temporal.ChronoUnit.MINUTES) / 60.0;
