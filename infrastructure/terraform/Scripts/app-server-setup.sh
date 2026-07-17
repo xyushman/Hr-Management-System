@@ -10,7 +10,7 @@ mkdir -p /opt/hrms
 cat << EOF > /opt/hrms/.env
 # --- Database & Spring Boot Configuration ---
 SPRING_PROFILES_ACTIVE=default
-SPRING_DATASOURCE_URL=${db_url}&useServerPrepStmts=false&serverTimezone=UTC
+SPRING_DATASOURCE_URL=${db_url}&useServerPrepStmts=false&serverTimezone=Asia/Kolkata
 SPRING_DATASOURCE_USERNAME=${db_username}
 SPRING_DATASOURCE_PASSWORD=${db_password}
 SPRING_JPA_DATABASE_PLATFORM=${db_platform}
