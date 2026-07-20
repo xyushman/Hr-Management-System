@@ -7,15 +7,19 @@ import java.sql.Time;
 import java.time.LocalTime;
 
 @Converter(autoApply = true)
-public class LocalTimeConverter implements AttributeConverter<LocalTime, Time> {
+public class LocalTimeConverter implements AttributeConverter<LocalTime, String> {
 
     @Override
-    public Time convertToDatabaseColumn(LocalTime localTime) {
-        return localTime == null ? null : Time.valueOf(localTime);
+    public String convertToDatabaseColumn(LocalTime localTime) {
+        return localTime == null ? null : localTime.format(java.time.format.DateTimeFormatter.ISO_LOCAL_TIME);
     }
 
     @Override
-    public LocalTime convertToEntityAttribute(Time time) {
-        return time == null ? null : time.toLocalTime();
+    public LocalTime convertToEntityAttribute(String timeString) {
+        if (timeString == null) return null;
+        if (timeString.length() > 8) {
+            timeString = timeString.substring(0, 8);
+        }
+        return LocalTime.parse(timeString);
     }
 }
