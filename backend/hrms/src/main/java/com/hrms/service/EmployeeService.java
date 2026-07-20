@@ -121,7 +121,11 @@ public class EmployeeService {
         if (req.getPassword() != null && !req.getPassword().isBlank()) {
             emp.setPassword(passwordEncoder.encode(req.getPassword()));
         }
-        return toResponse(employeeRepository.save(emp));
+        Employee saved = employeeRepository.save(emp);
+        if (userCacheService != null && saved.getEmail() != null) {
+            userCacheService.evict(saved.getEmail());
+        }
+        return toResponse(saved);
     }
 
 
