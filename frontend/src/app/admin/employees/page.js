@@ -285,7 +285,7 @@ export default function EmployeeManagementPage() {
                   {emp.employeeCode}
                 </div>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0 }}>
                   <div style={{
                     width: '34px', height: '34px', borderRadius: '50%',
                     background: 'linear-gradient(135deg, #1e3a5f, #3b82f6)',
@@ -294,16 +294,16 @@ export default function EmployeeManagementPage() {
                   }}>
                     {emp.firstName?.[0]}{emp.lastName?.[0]}
                   </div>
-                  <div>
-                    <div style={{ fontSize: '13px', fontWeight: '600', color: '#1e293b' }}>
+                  <div style={{ minWidth: 0 }}>
+                    <div style={{ fontSize: '13px', fontWeight: '600', color: '#1e293b', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                       {emp.firstName} {emp.lastName}
                     </div>
-                    <div style={{ fontSize: '11px', color: '#94a3b8' }}>{emp.email}</div>
+                    <div style={{ fontSize: '11px', color: '#94a3b8', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{emp.email}</div>
                   </div>
                 </div>
 
-                <div style={{ fontSize: '13px', color: '#64748b' }}>{emp.department || '—'}</div>
-                <div style={{ fontSize: '13px', color: '#64748b' }}>{emp.designation || '—'}</div>
+                <div style={{ fontSize: '13px', color: '#64748b', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{emp.department || '—'}</div>
+                <div style={{ fontSize: '13px', color: '#64748b', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{emp.designation || '—'}</div>
                 <Badge status={emp.role}/>
                 <Badge status={emp.active ? 'ACTIVE' : 'INACTIVE'}/>
 
