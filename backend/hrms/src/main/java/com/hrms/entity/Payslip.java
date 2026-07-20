@@ -42,7 +42,7 @@ public class Payslip {
     @Column(precision = 12, scale = 2) private BigDecimal totalDeductions;
     @Column(precision = 12, scale = 2) private BigDecimal netSalary;
 
-    private int presentDays;
+    private double presentDays;
     private int lopDays;
     private LocalDate payDate;
 

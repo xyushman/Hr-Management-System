@@ -31,7 +31,7 @@ public class UserCacheService {
         }
     }
 
-    private static class CacheEntry {
+    public static class CacheEntry {
         final Employee employee;
         final long timestamp;
         CacheEntry(Employee employee, long timestamp) {

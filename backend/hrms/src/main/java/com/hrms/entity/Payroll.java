@@ -58,7 +58,7 @@ public class Payroll {
     @Column(precision = 12, scale = 2)
     private BigDecimal netSalary;
 
-    private int presentDays;
+    private double presentDays;
     private int lopDays;                // Loss of Pay
 
     private boolean paid = false;

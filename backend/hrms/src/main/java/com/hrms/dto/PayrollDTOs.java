@@ -34,7 +34,7 @@ public class PayrollDTOs {
         private BigDecimal tds;
         private BigDecimal totalDeductions;
         private BigDecimal netSalary;
-        private int presentDays;
+        private double presentDays;
         private int lopDays;
         private boolean paid;
         private LocalDate payDate;

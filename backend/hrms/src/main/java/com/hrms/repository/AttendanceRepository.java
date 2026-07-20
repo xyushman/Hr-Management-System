@@ -25,8 +25,4 @@ public interface AttendanceRepository extends JpaRepository<Attendance, Long> {
     Page<Attendance> findByDate(LocalDate date, Pageable pageable);
 
     long countByEmployeeAndDateBetweenAndStatus(Employee employee, LocalDate from, LocalDate to, AttendanceStatus status);
-
-    @Query("SELECT COUNT(a) FROM Attendance a WHERE a.employee = :emp " +
-           "AND a.date >= :from AND a.date <= :to AND a.status IN ('PRESENT','HALF_DAY')")
-    long countPresentDays(Employee emp, LocalDate from, LocalDate to);
 }

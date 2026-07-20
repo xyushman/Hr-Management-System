@@ -39,9 +39,11 @@ public class PayrollService {
         YearMonth ym = YearMonth.of(req.getYear(), req.getMonth());
         LocalDate from = ym.atDay(1);
         LocalDate to = ym.atEndOfMonth();
-        long presentDays = attendanceRepo.countPresentDays(emp, from, to);
+        long fullDays = attendanceRepo.countByEmployeeAndDateBetweenAndStatus(emp, from, to, com.hrms.enums.AttendanceStatus.PRESENT);
+        long halfDays = attendanceRepo.countByEmployeeAndDateBetweenAndStatus(emp, from, to, com.hrms.enums.AttendanceStatus.HALF_DAY);
+        double presentDays = fullDays + (halfDays * 0.5);
         int workingDaysInMonth = countWorkingDays(from, to);
-        int lopDays = Math.max(0, workingDaysInMonth - (int) presentDays);
+        int lopDays = Math.max(0, workingDaysInMonth - (int) Math.ceil(presentDays));
 
         BigDecimal proRatedBasic = basic.multiply(BigDecimal.valueOf(presentDays))
                 .divide(BigDecimal.valueOf(workingDaysInMonth), 2, RoundingMode.HALF_UP);
@@ -76,7 +78,7 @@ public class PayrollService {
                 .tds(tds)
                 .totalDeductions(totalDeductions)
                 .netSalary(netSalary)
-                .presentDays((int) presentDays)
+                .presentDays(presentDays)
                 .lopDays(lopDays)
                 .paid(false)
                 .build();

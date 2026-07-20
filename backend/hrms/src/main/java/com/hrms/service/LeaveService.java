@@ -73,12 +73,14 @@ public class LeaveService {
         int days = calculateWorkingDays(
                 req.getStartDate(), req.getEndDate());
 
+        int pendingDays = leaveRepo.sumPendingDaysByEmployeeAndLeaveType(emp, req.getLeaveType());
+
         if (!leaveBalanceService.hasSufficientBalance(
-                emp, req.getLeaveType(), days)) {
+                emp, req.getLeaveType(), days + pendingDays)) {
             throw new IllegalStateException(
                     "Insufficient leave balance for "
                             + req.getLeaveType()
-                            + ". Requested: " + days + " days");
+                            + ". Requested: " + days + " days, Pending: " + pendingDays + " days.");
         }
 
         Employee manager = req.getManagerId() != null

@@ -35,4 +35,7 @@ public interface LeaveRequestRepository
             "l.employee = :employee")
     List<LeaveRequest> findAllByEmployee(
             Employee employee);
+
+    @Query("SELECT COALESCE(SUM(l.totalDays), 0) FROM LeaveRequest l WHERE l.employee = :employee AND l.leaveType = :leaveType AND l.status = 'PENDING'")
+    int sumPendingDaysByEmployeeAndLeaveType(Employee employee, String leaveType);
 }
