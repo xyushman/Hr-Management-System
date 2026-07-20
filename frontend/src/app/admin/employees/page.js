@@ -284,7 +284,7 @@ export default function EmployeeManagementPage() {
                 onMouseLeave={e => e.currentTarget.style.background = 'white'}
               >
                 <div style={{ fontSize: '12px', color: '#94a3b8', fontWeight: '600' }}>
-                  {emp.employeeCode}
+                  {emp.employeeId}
                 </div>
 
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0 }}>

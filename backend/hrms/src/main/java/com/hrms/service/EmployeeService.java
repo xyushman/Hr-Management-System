@@ -189,11 +189,11 @@ public class EmployeeService {
     }
 
     private String generateEmployeeId() {
-        long count = employeeRepository.count() + 1;
-        String empId = "EMP" + String.format("%04d", count);
+        long count = employeeRepository.count() + 10000;
+        String empId = String.valueOf(count);
         while (employeeRepository.findByEmployeeId(empId).isPresent()) {
             count++;
-            empId = "EMP" + String.format("%04d", count);
+            empId = String.valueOf(count);
         }
         return empId;
     }
