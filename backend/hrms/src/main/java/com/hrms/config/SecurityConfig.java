@@ -39,10 +39,11 @@ public class SecurityConfig {
             "/swagger-ui.html",
             "/api-docs/**",
             "/api/employees/managers",
-            "/v3/api-docs/**"
+            "/v3/api-docs/**",
+            "/api/greeting/status",
+            "/api/upload/document"
     };
 
-    // Admin/HR only endpoints
     private static final String[] ADMIN_HR_URLS = {
             "/api/employees/search",
             "/api/payroll/generate",
@@ -54,7 +55,7 @@ public class SecurityConfig {
             "/api/leaves",
             "/api/leaves/*/hr-action",
             "/api/leaves/*/cancel-action",
-            "/api/attendance/date/**",
+            "/api/attendance/admin/**",
             "/api/performance",
             "/api/performance/*/update",
             "/api/trainings",
@@ -64,13 +65,29 @@ public class SecurityConfig {
             "/api/recruitment/applications/**",
             "/api/onboarding/init/**",
             "/api/onboarding/pending",
-            "/api/onboarding"
+            "/api/onboarding",
+
+            "/api/greeting/send",
+            "/api/greeting/templates",
+            "/api/greeting/templates/**",
+            "/api/greeting/history",
+            "/api/greeting/history/**",
+
+            "/api/greeting/send-online-interview",
+            "/api/greeting/send-offline-interview",
+            "/api/greeting/send-offer-letter",
+
+            // for submission of docum req
+            "/api/document-request/send",
+            "/api/document-request/list",
+
     };
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http,
-                                           JwtAuthFilter jwtAuthFilter,
-                                           AuthenticationProvider authenticationProvider) throws Exception {
+            JwtAuthFilter jwtAuthFilter,
+
+            AuthenticationProvider authenticationProvider) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
@@ -79,8 +96,13 @@ public class SecurityConfig {
                         .requestMatchers(PUBLIC_URLS).permitAll()
                         .requestMatchers("/api/employees/managers").permitAll()
                         .requestMatchers(ADMIN_HR_URLS).hasAnyRole("ADMIN", "HR")
-                        .anyRequest().authenticated()
-                )
+                        // ATTENDANCE - Employee authenticated endpoints (check-in, check-out, my,
+                        // my/detailed-report)
+                        .requestMatchers("/api/attendance/check-in").authenticated()
+                        .requestMatchers("/api/attendance/check-out").authenticated()
+                        .requestMatchers("/api/attendance/my").authenticated()
+                        .requestMatchers("/api/attendance/my/**").authenticated()
+                        .anyRequest().authenticated())
                 .authenticationProvider(authenticationProvider)
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
@@ -88,13 +110,14 @@ public class SecurityConfig {
     }
 
     @Bean
-    public UserDetailsService userDetailsService(com.hrms.service.UserCacheService userCacheService) {
-        return username -> userCacheService.getByEmail(username);
+    public UserDetailsService userDetailsService(EmployeeRepository employeeRepository) {
+        return username -> employeeRepository.findByEmail(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
     }
 
     @Bean
     public AuthenticationProvider authenticationProvider(UserDetailsService userDetailsService,
-                                                         PasswordEncoder passwordEncoder) {
+            PasswordEncoder passwordEncoder) {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
         provider.setUserDetailsService(userDetailsService);
         provider.setPasswordEncoder(passwordEncoder);
@@ -108,22 +131,16 @@ public class SecurityConfig {
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder(4);
+        return new BCryptPasswordEncoder();
     }
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of(
-                "http://localhost:3000",
-                "http://127.0.0.1:3000",
-                "https://hrms.saitejainfotechprivatelimited.com"
-        ));
         config.setAllowedOriginPatterns(List.of("*"));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);
-        config.setMaxAge(3600L);
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
         return source;

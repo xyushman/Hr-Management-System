@@ -14,13 +14,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.util.NoSuchElementException;
-
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.NoSuchElementException;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import com.hrms.enums.Role;
 
@@ -46,26 +42,47 @@ public class EmployeeService {
         }
         String email = req.getEmail().trim().toLowerCase();
         req.setEmail(email);
+        if (req.getEmployeeId() == null || req.getEmployeeId().trim().isBlank()) {
+            throw new IllegalArgumentException("Employee ID is required");
+        }
+        if (req.getPassword() == null || req.getPassword().isBlank()) {
+            throw new IllegalArgumentException("Password is required");
+        }
 
-        java.util.Optional<Employee> existingOpt = employeeRepository.findByEmail(email);
+        String employeeId = req.getEmployeeId().trim().toUpperCase();
+
+        if (employeeRepository.findByEmployeeId(employeeId).isPresent()) {
+            throw new IllegalArgumentException("Employee ID already exists");
+        }
+
+        Optional<Employee> existingOpt = employeeRepository.findByEmail(email);
         if (existingOpt.isPresent()) {
             Employee existing = existingOpt.get();
             if (existing.isActive()) {
                 throw new EmployeeAlreadyExists(email);
             } else {
-                if (req.getFirstName() != null) existing.setFirstName(req.getFirstName().trim());
-                if (req.getLastName() != null) existing.setLastName(req.getLastName().trim());
+                if (req.getFirstName() != null)
+                    existing.setFirstName(req.getFirstName().trim());
+                if (req.getLastName() != null)
+                    existing.setLastName(req.getLastName().trim());
                 existing.setEmail(email);
+                existing.setEmployeeId(employeeId);
                 if (req.getPassword() != null && !req.getPassword().isBlank()) {
                     existing.setPassword(passwordEncoder.encode(req.getPassword()));
                 }
-                if (req.getPhone() != null) existing.setPhone(req.getPhone().trim());
-                if (req.getDepartment() != null) existing.setDepartment(req.getDepartment().trim());
-                if (req.getDesignation() != null) existing.setDesignation(req.getDesignation().trim());
-                if (req.getBasicSalary() != null) existing.setBasicSalary(req.getBasicSalary());
+                if (req.getPhone() != null)
+                    existing.setPhone(req.getPhone().trim());
+                if (req.getDepartment() != null)
+                    existing.setDepartment(req.getDepartment().trim());
+                if (req.getDesignation() != null)
+                    existing.setDesignation(req.getDesignation().trim());
+                if (req.getBasicSalary() != null)
+                    existing.setBasicSalary(req.getBasicSalary());
                 existing.setDateOfJoining(req.getDateOfJoining() != null ? req.getDateOfJoining() : LocalDate.now());
-                if (req.getDateOfBirth() != null) existing.setDateOfBirth(req.getDateOfBirth());
-                if (req.getRole() != null) existing.setRole(req.getRole());
+                if (req.getDateOfBirth() != null)
+                    existing.setDateOfBirth(req.getDateOfBirth());
+                if (req.getRole() != null)
+                    existing.setRole(req.getRole());
                 existing.setActive(true);
 
                 if (userCacheService != null) {
@@ -76,7 +93,7 @@ public class EmployeeService {
         }
 
         Employee emp = Employee.builder()
-                .employeeId(generateEmployeeId())
+                .employeeId(employeeId)
                 .firstName(req.getFirstName() != null ? req.getFirstName().trim() : null)
                 .lastName(req.getLastName() != null ? req.getLastName().trim() : null)
                 .email(email)
@@ -99,7 +116,6 @@ public class EmployeeService {
         return employeeRepository.findAll(pageable).map(this::toResponse);
     }
 
-
     @org.springframework.transaction.annotation.Transactional(readOnly = true)
     public EmployeeDTOs.Response getById(Long id) {
         return toResponse(findById(id));
@@ -109,15 +125,24 @@ public class EmployeeService {
     @CacheEvict(value = "dashboardData", allEntries = true)
     public EmployeeDTOs.Response updateEmployee(Long id, EmployeeDTOs.UpdateRequest req) {
         Employee emp = findById(id);
-        if (req.getFirstName() != null)    emp.setFirstName(req.getFirstName());
-        if (req.getLastName() != null)     emp.setLastName(req.getLastName());
-        if (req.getPhone() != null)        emp.setPhone(req.getPhone());
-        if (req.getDepartment() != null)   emp.setDepartment(req.getDepartment());
-        if (req.getDesignation() != null)  emp.setDesignation(req.getDesignation());
-        if (req.getBasicSalary() != null)  emp.setBasicSalary(req.getBasicSalary());
-        if (req.getDateOfBirth() != null)  emp.setDateOfBirth(req.getDateOfBirth());
-        if (req.getRole() != null)         emp.setRole(req.getRole());
-        if (req.getActive() != null)       emp.setActive(req.getActive());
+        if (req.getFirstName() != null)
+            emp.setFirstName(req.getFirstName());
+        if (req.getLastName() != null)
+            emp.setLastName(req.getLastName());
+        if (req.getPhone() != null)
+            emp.setPhone(req.getPhone());
+        if (req.getDepartment() != null)
+            emp.setDepartment(req.getDepartment());
+        if (req.getDesignation() != null)
+            emp.setDesignation(req.getDesignation());
+        if (req.getBasicSalary() != null)
+            emp.setBasicSalary(req.getBasicSalary());
+        if (req.getDateOfBirth() != null)
+            emp.setDateOfBirth(req.getDateOfBirth());
+        if (req.getRole() != null)
+            emp.setRole(req.getRole());
+        if (req.getActive() != null)
+            emp.setActive(req.getActive());
         if (req.getPassword() != null && !req.getPassword().isBlank()) {
             emp.setPassword(passwordEncoder.encode(req.getPassword()));
         }
@@ -127,7 +152,6 @@ public class EmployeeService {
         }
         return toResponse(saved);
     }
-
 
     @Transactional
     @CacheEvict(value = "dashboardData", allEntries = true)
@@ -140,6 +164,19 @@ public class EmployeeService {
         }
     }
 
+    /**
+     * NOTE: this method manually nulls/deletes rows across every entity that
+     * references
+     * Employee via a foreign key. If a new entity with an
+     * employee/manager/reviewer/etc.
+     * FK is added to the schema, it must be added here too, or deleteEmployee()
+     * will fail
+     * with a foreign-key constraint violation (or silently leave orphaned rows, if
+     * the
+     * constraint isn't enforced). Consider replacing this with DB-level ON DELETE
+     * CASCADE / SET NULL mappings so this list doesn't need to be kept in sync by
+     * hand.
+     */
     @Transactional
     @CacheEvict(value = "dashboardData", allEntries = true)
     public void deleteEmployee(Long id) {
@@ -148,22 +185,37 @@ public class EmployeeService {
             userCacheService.evict(emp.getEmail());
         }
         if (entityManager != null) {
-            entityManager.createQuery("UPDATE LeaveRequest l SET l.manager = null WHERE l.manager.id = :id").setParameter("id", id).executeUpdate();
-            entityManager.createQuery("UPDATE LeaveRequest l SET l.approvedBy = null WHERE l.approvedBy.id = :id").setParameter("id", id).executeUpdate();
-            entityManager.createQuery("UPDATE Onboarding o SET o.assignedHr = null WHERE o.assignedHr.id = :id").setParameter("id", id).executeUpdate();
-            entityManager.createQuery("UPDATE JobPosting j SET j.createdBy = null WHERE j.createdBy.id = :id").setParameter("id", id).executeUpdate();
-            entityManager.createQuery("UPDATE JobApplication j SET j.interviewer = null WHERE j.interviewer.id = :id").setParameter("id", id).executeUpdate();
-            entityManager.createQuery("UPDATE PerformanceReview p SET p.reviewer = null WHERE p.reviewer.id = :id").setParameter("id", id).executeUpdate();
+            entityManager.createQuery("UPDATE LeaveRequest l SET l.manager = null WHERE l.manager.id = :id")
+                    .setParameter("id", id).executeUpdate();
+            entityManager.createQuery("UPDATE LeaveRequest l SET l.approvedBy = null WHERE l.approvedBy.id = :id")
+                    .setParameter("id", id).executeUpdate();
+            entityManager.createQuery("UPDATE Onboarding o SET o.assignedHr = null WHERE o.assignedHr.id = :id")
+                    .setParameter("id", id).executeUpdate();
+            entityManager.createQuery("UPDATE JobPosting j SET j.createdBy = null WHERE j.createdBy.id = :id")
+                    .setParameter("id", id).executeUpdate();
+            entityManager.createQuery("UPDATE JobApplication j SET j.interviewer = null WHERE j.interviewer.id = :id")
+                    .setParameter("id", id).executeUpdate();
+            entityManager.createQuery("UPDATE PerformanceReview p SET p.reviewer = null WHERE p.reviewer.id = :id")
+                    .setParameter("id", id).executeUpdate();
 
-            entityManager.createQuery("DELETE FROM Attendance a WHERE a.employee.id = :id").setParameter("id", id).executeUpdate();
-            entityManager.createQuery("DELETE FROM LeaveRequest l WHERE l.employee.id = :id").setParameter("id", id).executeUpdate();
-            entityManager.createQuery("DELETE FROM LeaveBalance l WHERE l.employee.id = :id").setParameter("id", id).executeUpdate();
-            entityManager.createQuery("DELETE FROM Payroll p WHERE p.employee.id = :id").setParameter("id", id).executeUpdate();
-            entityManager.createQuery("DELETE FROM Payslip p WHERE p.employee.id = :id").setParameter("id", id).executeUpdate();
-            entityManager.createQuery("DELETE FROM PerformanceReview p WHERE p.employee.id = :id").setParameter("id", id).executeUpdate();
-            entityManager.createQuery("DELETE FROM Notification n WHERE n.recipient.id = :id").setParameter("id", id).executeUpdate();
-            entityManager.createQuery("DELETE FROM Onboarding o WHERE o.employee.id = :id").setParameter("id", id).executeUpdate();
-            entityManager.createQuery("DELETE FROM TrainingEnrollment t WHERE t.employee.id = :id").setParameter("id", id).executeUpdate();
+            entityManager.createQuery("DELETE FROM Attendance a WHERE a.employee.id = :id").setParameter("id", id)
+                    .executeUpdate();
+            entityManager.createQuery("DELETE FROM LeaveRequest l WHERE l.employee.id = :id").setParameter("id", id)
+                    .executeUpdate();
+            entityManager.createQuery("DELETE FROM LeaveBalance l WHERE l.employee.id = :id").setParameter("id", id)
+                    .executeUpdate();
+            entityManager.createQuery("DELETE FROM Payroll p WHERE p.employee.id = :id").setParameter("id", id)
+                    .executeUpdate();
+            entityManager.createQuery("DELETE FROM Payslip p WHERE p.employee.id = :id").setParameter("id", id)
+                    .executeUpdate();
+            entityManager.createQuery("DELETE FROM PerformanceReview p WHERE p.employee.id = :id")
+                    .setParameter("id", id).executeUpdate();
+            entityManager.createQuery("DELETE FROM Notification n WHERE n.recipient.id = :id").setParameter("id", id)
+                    .executeUpdate();
+            entityManager.createQuery("DELETE FROM Onboarding o WHERE o.employee.id = :id").setParameter("id", id)
+                    .executeUpdate();
+            entityManager.createQuery("DELETE FROM TrainingEnrollment t WHERE t.employee.id = :id")
+                    .setParameter("id", id).executeUpdate();
         }
         employeeRepository.delete(emp);
     }
@@ -172,6 +224,7 @@ public class EmployeeService {
     public Page<EmployeeDTOs.Response> search(String q, Pageable pageable) {
         return employeeRepository.search(q, pageable).map(this::toResponse);
     }
+
     @org.springframework.transaction.annotation.Transactional(readOnly = true)
     public List<EmployeeDTOs.Response> getManagers() {
         return employeeRepository.findAll()
@@ -188,23 +241,13 @@ public class EmployeeService {
                 .orElseThrow(() -> new NoSuchElementException("Employee not found: " + id));
     }
 
-    private String generateEmployeeId() {
-        long count = employeeRepository.count() + 10000;
-        String empId = String.valueOf(count);
-        while (employeeRepository.findByEmployeeId(empId).isPresent()) {
-            count++;
-            empId = String.valueOf(count);
-        }
-        return empId;
-    }
-
     public EmployeeDTOs.Response toResponse(Employee e) {
         EmployeeDTOs.Response r = new EmployeeDTOs.Response();
         r.setId(e.getId());
         r.setEmployeeId(e.getEmployeeId());
         r.setFirstName(e.getFirstName());
         r.setLastName(e.getLastName());
-        r.setFullName(e.getFirstName() + " " + e.getLastName());
+        r.setFullName(buildFullName(e.getFirstName(), e.getLastName()));
         r.setEmail(e.getEmail());
         r.setPhone(e.getPhone());
         r.setDepartment(e.getDepartment());
@@ -216,6 +259,13 @@ public class EmployeeService {
         r.setActive(e.isActive());
         r.setCreatedAt(e.getCreatedAt());
         return r;
+    }
+
+    private String buildFullName(String firstName, String lastName) {
+        String first = firstName != null ? firstName.trim() : "";
+        String last = lastName != null ? lastName.trim() : "";
+        String full = (first + " " + last).trim();
+        return full.isEmpty() ? null : full;
     }
 
 }
