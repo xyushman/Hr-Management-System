@@ -109,4 +109,3 @@ docker compose down -v
 ## Further Reading & Architecture Reference
 * **End-to-End System Architecture & Networking:** [DOCUMENTATION.md](DOCUMENTATION.md)
 * **Backend API Details & Swagger Details:** [backend/hrms/README.md](backend/hrms/README.md)
-## ----------------------------------------------------------------------------------------------------------------------------------
