@@ -57,6 +57,22 @@ export const generatePayslip = (payrollId) =>
 export const getAttendanceByDate = (date) =>
   api.get(`/api/attendance/date/${date}`);
 
+// ── Attendance report: table view (all employees, one date, paginated) ──
+export const getAttendanceSummaryByDate = (date, page = 0, size = 50) =>
+  api.get(`/api/attendance/admin/summary/${date}?page=${page}&size=${size}`);
+
+// ── Attendance report: modal view (one employee, yesterday/weekly/monthly) ──
+export const getEmployeeDetailedReport = (employeeId, asOfDate) =>
+  api.get(`/api/attendance/admin/employee/${employeeId}/detailed-report`, {
+    params: asOfDate ? { asOfDate } : {},
+  });
+
+// Optional single-employee single-date lookup (available if ever needed)
+export const getEmployeeAttendanceSummary = (employeeId, date) =>
+  api.get(`/api/attendance/admin/employee/${employeeId}/summary`, {
+    params: date ? { date } : {},
+  });
+
 export const getAllOnboarding = () =>
   api.get('/api/onboarding');
 
