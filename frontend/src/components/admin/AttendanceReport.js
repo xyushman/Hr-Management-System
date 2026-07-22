@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useState, useMemo } from 'react';
-import { getAttendanceSummaryByDate } from '@/lib/adminApi';
+import { getAttendanceSummaryByDate, exportAttendanceRange } from '@/lib/adminApi';
+import { downloadBlob } from '@/lib/downloadFile';
 import EmployeeAttendanceModal from './EmployeeAttendanceModal';
 import toast from 'react-hot-toast';
 
@@ -31,7 +32,8 @@ function todayIST() {
 }
 
 export default function AttendanceReport() {
-    const [date, setDate] = useState(todayIST());
+    const [fromDate, setFromDate] = useState(todayIST());
+    const [toDate, setToDate] = useState(todayIST());
     const [search, setSearch] = useState('');
     const [statusFilter, setStatusFilter] = useState('ALL');
     const [rows, setRows] = useState([]);
@@ -39,10 +41,11 @@ export default function AttendanceReport() {
     const [page, setPage] = useState(0);
     const [totalPages, setTotalPages] = useState(1);
     const [selectedEmployeeId, setSelectedEmployeeId] = useState(null);
+    const [exporting, setExporting] = useState(false);
 
     useEffect(() => {
         let active = true;
-        getAttendanceSummaryByDate(date, page, 50)
+        getAttendanceSummaryByDate(toDate, page, 50)
             .then((res) => {
                 if (!active) return;
                 const pageData = res.data?.data;
@@ -56,7 +59,7 @@ export default function AttendanceReport() {
                 if (active) setLoading(false);
             });
         return () => { active = false; };
-    }, [date, page]);
+    }, [toDate, page]);
 
     const filteredRows = useMemo(() => {
         return rows.filter((r) => {
@@ -68,6 +71,18 @@ export default function AttendanceReport() {
         });
     }, [rows, search, statusFilter]);
 
+    const handleExport = async () => {
+        setExporting(true);
+        try {
+            const res = await exportAttendanceRange(fromDate, toDate, statusFilter, search);
+            downloadBlob(res, `attendance_${fromDate}_to_${toDate}.xlsx`);
+        } catch (err) {
+            toast.error(err.response?.data?.message || 'Export failed');
+        } finally {
+            setExporting(false);
+        }
+    };
+
     return (
         <div>
             <div style={{ marginBottom: '20px' }}>
@@ -75,7 +90,7 @@ export default function AttendanceReport() {
                     Attendance report
                 </h1>
                 <p style={{ fontSize: '13px', color: '#94a3b8' }}>
-                    View attendance for all employees by date.
+                    View attendance for all employees by date range.
                 </p>
             </div>
 
@@ -95,8 +110,17 @@ export default function AttendanceReport() {
                 />
                 <input
                     type="date"
-                    value={date}
-                    onChange={(e) => { setLoading(true); setDate(e.target.value); setPage(0); }}
+                    value={fromDate}
+                    onChange={(e) => setFromDate(e.target.value)}
+                    style={{
+                        padding: '8px 12px', border: '1px solid #e2e8f0',
+                        borderRadius: '8px', fontSize: '13px',
+                    }}
+                />
+                <input
+                    type="date"
+                    value={toDate}
+                    onChange={(e) => { setLoading(true); setToDate(e.target.value); setPage(0); }}
                     style={{
                         padding: '8px 12px', border: '1px solid #e2e8f0',
                         borderRadius: '8px', fontSize: '13px',
@@ -116,6 +140,17 @@ export default function AttendanceReport() {
                     <option value="ON_LEAVE">On leave</option>
                     <option value="ABSENT">Absent</option>
                 </select>
+                <button
+                    onClick={handleExport}
+                    disabled={exporting}
+                    style={{
+                        padding: '8px 16px', background: '#1e3a5f', color: 'white',
+                        border: 'none', borderRadius: '8px', fontSize: '13px', fontWeight: '700',
+                        cursor: exporting ? 'not-allowed' : 'pointer',
+                    }}
+                >
+                    {exporting ? 'Exporting...' : '⬇ Export'}
+                </button>
             </div>
 
             <div style={{
@@ -210,9 +245,9 @@ export default function AttendanceReport() {
 
             {selectedEmployeeId && (
                 <EmployeeAttendanceModal
-                    key={`${selectedEmployeeId}-${date}`}
+                    key={`${selectedEmployeeId}-${toDate}`}
                     employeeId={selectedEmployeeId}
-                    asOfDate={date}
+                    asOfDate={toDate}
                     onClose={() => setSelectedEmployeeId(null)}
                 />
             )}
