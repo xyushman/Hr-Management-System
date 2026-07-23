@@ -75,7 +75,7 @@ export default function AttendanceReport() {
         setExporting(true);
         try {
             const res = await exportAttendanceRange(fromDate, toDate, statusFilter, search);
-            downloadBlob(res, `attendance_${fromDate}_to_${toDate}.xlsx`);
+            downloadBlob(res, `Attendance_Report_${fromDate}_to_${toDate}.xlsx`);
         } catch (err) {
             toast.error(err.response?.data?.message || 'Export failed');
         } finally {
