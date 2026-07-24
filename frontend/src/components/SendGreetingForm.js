@@ -16,15 +16,18 @@ export default function SendGreetingForm() {
     const [currentUser, setCurrentUser] = useState(null);
 
     useEffect(() => {
-        const userStr = localStorage.getItem('user');
-        if (userStr) {
-            try {
-                const user = JSON.parse(userStr);
-                setCurrentUser(user);
-            } catch (e) {
-                console.error('Failed to parse user data');
+        const loadUser = async () => {
+            const userStr = localStorage.getItem('user');
+            if (userStr) {
+                try {
+                    const user = JSON.parse(userStr);
+                    setCurrentUser(user);
+                } catch (e) {
+                    console.error('Failed to parse user data');
+                }
             }
-        }
+        };
+        loadUser();
     }, []);
 
     useEffect(() => {
@@ -55,13 +58,16 @@ export default function SendGreetingForm() {
     }, []);
 
     useEffect(() => {
-        const template = templates.find(t => t.id === templateId);
-        if (template && candidateName) {
-            const preview = template.templateBody.replace('{CANDIDATE_NAME}', candidateName);
-            setGreetingPreview(preview);
-        } else if (template) {
-            setGreetingPreview(template.templateBody);
-        }
+        const updatePreview = async () => {
+            const template = templates.find(t => t.id === templateId);
+            if (template && candidateName) {
+                const preview = template.templateBody.replace('{CANDIDATE_NAME}', candidateName);
+                setGreetingPreview(preview);
+            } else if (template) {
+                setGreetingPreview(template.templateBody);
+            }
+        };
+        updatePreview();
     }, [candidateName, templateId, templates]);
 
     const handleSendGreeting = async (e) => {

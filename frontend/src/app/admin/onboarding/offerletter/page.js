@@ -9,23 +9,27 @@ export default function OfferLetterPage() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const token = localStorage.getItem('accessToken');
-        const userStr = localStorage.getItem('user');
-        const user = userStr ? JSON.parse(userStr) : null;
-        const userRole = user?.role;
+        const checkAuth = async () => {
+            const token = localStorage.getItem('accessToken');
+            const userStr = localStorage.getItem('user');
+            const user = userStr ? JSON.parse(userStr) : null;
+            const userRole = user?.role;
 
-        if (!token) {
-            router.push('/login');
-            return;
-        }
+            if (!token) {
+                router.push('/login');
+                return;
+            }
 
-        if (userRole?.toLowerCase() !== 'admin' && userRole?.toLowerCase() !== 'hr') {
-            router.push('/admin/dashboard');
-            return;
-        }
+            if (userRole?.toLowerCase() !== 'admin' && userRole?.toLowerCase() !== 'hr') {
+                router.push('/admin/dashboard');
+                return;
+            }
 
-        setIsAuthenticated(true);
-        setLoading(false);
+            setIsAuthenticated(true);
+            setLoading(false);
+        };
+        
+        checkAuth();
     }, [router]);
 
     if (loading) {
